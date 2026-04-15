@@ -5,26 +5,23 @@ const api = axios.create({
   timeout: 30000,
 });
 
-// Injeta token JWT em toda requisição
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('signage_token');
+  const token = localStorage.getItem('telaplay_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
-// Redireciona para login em 401, exceto no próprio login
 api.interceptors.response.use(
   (res) => res,
   (err) => {
     const status = err.response?.status;
     const requestUrl = err.config?.url || '';
-
     const isLoginRequest = requestUrl.includes('/auth/login');
 
     if (status === 401 && !isLoginRequest) {
-      localStorage.removeItem('signage_token');
+      localStorage.removeItem('telaplay_token');
       window.location.href = '/login';
     }
 
