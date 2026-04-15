@@ -6,7 +6,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('telaplay_token');
+  const token = localStorage.getItem('signage_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -21,7 +21,7 @@ api.interceptors.response.use(
     const isLoginRequest = requestUrl.includes('/auth/login');
 
     if (status === 401 && !isLoginRequest) {
-      localStorage.removeItem('telaplay_token');
+      localStorage.removeItem('signage_token');
       window.location.href = '/login';
     }
 
