@@ -64,27 +64,26 @@ app.use('/api/logs', logRoutes);
 // Erros
 app.use(errorHandler);
 
-// 🚀 CRIAR ADMIN AUTOMATICAMENTE
+// 🚀 CRIAR / ATUALIZAR ADMIN (FIX DEFINITIVO)
 async function createAdmin() {
-  const user = await prisma.user.findUnique({
-    where: { email: 'admin@telaplay.com' }
+  const hash = await bcrypt.hash('admin123', 10);
+
+  await prisma.user.upsert({
+    where: { email: 'admin@telaplay.com' },
+    update: {
+      password: hash,
+    },
+    create: {
+      email: 'admin@telaplay.com',
+      password: hash,
+      name: 'Administrador',
+      role: 'ADMIN'
+    }
   });
 
-  if (!user) {
-    const hash = await bcrypt.hash('admin123', 10);
-
-    await prisma.user.create({
-      data: {
-        email: 'admin@telaplay.com',
-        password: hash,
-        name: 'Administrador',
-        role: 'ADMIN'
-      }
-    });
-
-    console.log('✅ Admin criado com sucesso!');
-  }
+  console.log('✅ Admin atualizado/criado!');
 }
+
 createAdmin();
 
 const PORT = process.env.PORT || 3001;
