@@ -3,15 +3,22 @@ import api from '../lib/api';
 
 export const useAuthStore = create((set) => ({
   user: null,
-  token: localStorage.getItem('telaplay_token'),
+  token: localStorage.getItem('signage_token'),
   loading: false,
 
   login: async (email, password) => {
     set({ loading: true });
     try {
       const { data } = await api.post('/auth/login', { email, password });
-      localStorage.setItem('telaplay_token', data.token);
-      set({ user: data.user, token: data.token, loading: false });
+
+      localStorage.setItem('signage_token', data.token);
+
+      set({
+        user: data.user,
+        token: data.token,
+        loading: false,
+      });
+
       return data;
     } catch (err) {
       set({ loading: false });
@@ -20,7 +27,7 @@ export const useAuthStore = create((set) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('telaplay_token');
+    localStorage.removeItem('signage_token');
     set({ user: null, token: null });
   },
 
@@ -29,7 +36,7 @@ export const useAuthStore = create((set) => ({
       const { data } = await api.get('/auth/me');
       set({ user: data });
     } catch {
-      localStorage.removeItem('telaplay_token');
+      localStorage.removeItem('signage_token');
       set({ user: null, token: null });
     }
   },
