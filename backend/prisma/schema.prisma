@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(OPERATOR)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companies Company[]
+  logs      DisplayLog[]
+}
+
+enum Role {
+  ADMIN
+  OPERATOR
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logoUrl   String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  media     Media[]
+  playlists Playlist[]
+  screens   Screen[]
+}
+
+model Media {
+  id          String    @id @default(cuid())
+  name        String
+  type        MediaType
+  url         String
+  thumbnailUrl String?
+  duration    Int       @default(10) // seconds
+  fileSize    Int?      // bytes
+  mimeType    String?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  companyId   String
+  company     Company   @relation(fields: [companyId], references: [id])
+
+  playlistItems PlaylistItem[]
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model Playlist {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  loop        Boolean  @default(true)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+
+  items       PlaylistItem[]
+  screens     ScreenPlaylist[]
+}
+
+model PlaylistItem {
+  id         String   @id @default(cuid())
+  order      Int
+  duration   Int?     // override media duration
+  startAt    DateTime?
+  endAt      DateTime?
+  createdAt  DateTime @default(now())
+
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  mediaId    String
+  media      Media    @relation(fields: [mediaId], references: [id])
+
+  @@unique([playlistId, order])
+}
+
+model Screen {
+  id          String       @id @default(cuid())
+  name        String
+  deviceId    String       @unique @default(cuid())
+  location    String?
+  group       String?
+  status      ScreenStatus @default(OFFLINE)
+  lastSeenAt  DateTime?
+  shareToken  String       @unique @default(cuid())
+  active      Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  companyId   String
+  company     Company      @relation(fields: [companyId], references: [id])
+
+  playlists   ScreenPlaylist[]
+  logs        DisplayLog[]
+}
+
+enum ScreenStatus {
+  ONLINE
+  OFFLINE
+}
+
+model ScreenPlaylist {
+  id         String   @id @default(cuid())
+  priority   Int      @default(0)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  screenId   String
+  screen     Screen   @relation(fields: [screenId], references: [id], onDelete: Cascade)
+
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  @@unique([screenId, playlistId])
+}
+
+model DisplayLog {
+  id        String   @id @default(cuid())
+  event     String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  screenId  String
+  screen    Screen   @relation(fields: [screenId], references: [id])
+
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+}
