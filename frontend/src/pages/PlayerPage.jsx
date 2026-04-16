@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../lib/api';
+import TickerBar from '../components/components/TickerBar';
 
 const POLL_INTERVAL = 30_000; // fallback polling se WS cair
 const WS_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api')
@@ -52,6 +53,7 @@ export default function PlayerPage() {
       setPlaylistUpdatedAt(data.playlist?.updatedAt);
     } catch (err) {
       console.error('Erro ao buscar conteúdo:', err);
+
       // Tentar cache local
       try {
         const cached = localStorage.getItem(`signage_cache_${shareToken}`);
@@ -61,6 +63,7 @@ export default function PlayerPage() {
           return;
         }
       } catch (_) {}
+
       setError('Sem conexão. Tentando reconectar...');
     }
   }, [shareToken]);
@@ -71,6 +74,12 @@ export default function PlayerPage() {
       const ws = new WebSocket(`${WS_URL}?token=${shareToken}`);
       wsRef.current = ws;
 
+      const ping = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'PING' }));
+        }
+      }, 25_000);
+
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
@@ -78,19 +87,7 @@ export default function PlayerPage() {
         } catch (_) {}
       };
 
-      ws.onclose = () => {
-        // Reconectar após 5s
-        setTimeout(connect, 5000);
-      };
-
       ws.onerror = () => ws.close();
-
-      // Keepalive
-      const ping = setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ type: 'PING' }));
-        }
-      }, 25_000);
 
       ws.onclose = () => {
         clearInterval(ping);
@@ -112,16 +109,19 @@ export default function PlayerPage() {
   // ── Avançar item da playlist ────────────────────────────────────────────
   const advance = useCallback(() => {
     if (items.length === 0) return;
+
     setFade(false);
+
     setTimeout(() => {
       setCurrentIndex(i => (i + 1) % items.length);
       setFade(true);
-    }, 400); // tempo da transição
+    }, 400);
   }, [items.length]);
 
   // ── Timer por item ──────────────────────────────────────────────────────
   useEffect(() => {
     if (items.length === 0) return;
+
     const item = items[currentIndex];
     const duration = (item?.duration || 10) * 1000;
 
@@ -141,8 +141,8 @@ export default function PlayerPage() {
         <div className="text-center">
           <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-              <rect x="2" y="3" width="20" height="14" rx="2"/>
-              <path d="M8 21h8M12 17v4"/>
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8M12 17v4" />
             </svg>
           </div>
           <p className="text-white/50 text-sm">{error}</p>
@@ -194,7 +194,7 @@ export default function PlayerPage() {
 
       {/* Indicador de progresso (pontos) */}
       {items.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
+        <div className="absolute bottom-14 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-40">
           {items.map((_, i) => (
             <div
               key={i}
@@ -202,12 +202,17 @@ export default function PlayerPage() {
               style={{
                 width: i === currentIndex ? 20 : 6,
                 height: 6,
-                backgroundColor: i === currentIndex ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)',
+                backgroundColor: i === currentIndex
+                  ? 'rgba(255,255,255,0.9)'
+                  : 'rgba(255,255,255,0.3)',
               }}
             />
           ))}
         </div>
       )}
+
+      {/* Barra inferior fixa */}
+      <TickerBar />
     </div>
   );
 }
