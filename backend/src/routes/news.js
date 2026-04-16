@@ -1,5 +1,5 @@
 const express = require('express');
-const axios = require('axios');
+const axios = require('axios'); // 🔥 FALTAVA ISSO
 
 const router = express.Router();
 
@@ -16,12 +16,16 @@ router.get('/', async (req, res) => {
     );
 
     const articles = response.data.articles || [];
+
     const news = articles.map((item) => item.title).filter(Boolean);
 
     res.json({ news });
   } catch (error) {
     console.error('Erro ao buscar notícias:', error.message);
-    res.status(500).json({ error: 'Erro ao carregar notícias' });
+
+    res.status(500).json({
+      error: 'Erro ao carregar notícias',
+    });
   }
 });
 
