@@ -37,7 +37,9 @@ router.get('/', async (req, res, next) => {
     });
 
     res.json(screens);
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 });
 
 // GET /api/screens/:id
@@ -63,9 +65,14 @@ router.get('/:id', async (req, res, next) => {
       },
     });
 
-    if (!screen) return res.status(404).json({ error: 'Tela não encontrada' });
+    if (!screen) {
+      return res.status(404).json({ error: 'Tela não encontrada' });
+    }
+
     res.json(screen);
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 });
 
 // POST /api/screens
@@ -74,7 +81,9 @@ router.post('/', async (req, res, next) => {
     const data = screenSchema.parse(req.body);
     const screen = await prisma.screen.create({ data });
     res.status(201).json(screen);
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 });
 
 // PUT /api/screens/:id
@@ -86,7 +95,9 @@ router.put('/:id', async (req, res, next) => {
       data,
     });
     res.json(screen);
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 });
 
 // DELETE /api/screens/:id
@@ -94,17 +105,33 @@ router.delete('/:id', async (req, res, next) => {
   try {
     await prisma.screen.delete({ where: { id: req.params.id } });
     res.status(204).send();
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 });
 
-// POST /api/screens/:id/playlists — vincular playlist à tela
+// POST /api/screens/:id/playlists — vincular playlist à tela (substitui a atual)
 router.post('/:id/playlists', async (req, res, next) => {
   try {
     const { playlistId, priority = 0 } = req.body;
-    const sp = await prisma.screenPlaylist.upsert({
-      where: { screenId_playlistId: { screenId: req.params.id, playlistId } },
-      update: { priority, active: true },
-      create: { screenId: req.params.id, playlistId, priority },
+
+    if (!playlistId) {
+      return res.status(400).json({ error: 'playlistId é obrigatório' });
+    }
+
+    // Remove todas as playlists antigas desta tela
+    await prisma.screenPlaylist.deleteMany({
+      where: { screenId: req.params.id },
+    });
+
+    // Cria a nova playlist como única ativa da tela
+    const sp = await prisma.screenPlaylist.create({
+      data: {
+        screenId: req.params.id,
+        playlistId,
+        priority,
+        active: true,
+      },
     });
 
     // Notificar player via WebSocket
@@ -112,7 +139,9 @@ router.post('/:id/playlists', async (req, res, next) => {
     broadcast(wss, req.params.id, { type: 'PLAYLIST_UPDATED' });
 
     res.json(sp);
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 });
 
 // DELETE /api/screens/:id/playlists/:playlistId
@@ -131,7 +160,25 @@ router.delete('/:id/playlists/:playlistId', async (req, res, next) => {
     broadcast(wss, req.params.id, { type: 'PLAYLIST_UPDATED' });
 
     res.status(204).send();
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
+});
+
+// DELETE /api/screens/:id/playlists — remover todas as playlists da tela
+router.delete('/:id/playlists', async (req, res, next) => {
+  try {
+    await prisma.screenPlaylist.deleteMany({
+      where: { screenId: req.params.id },
+    });
+
+    const wss = req.app.get('wss');
+    broadcast(wss, req.params.id, { type: 'PLAYLIST_UPDATED' });
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
 });
 
 // POST /api/screens/:id/heartbeat — atualizar status online
@@ -142,7 +189,9 @@ router.post('/:id/heartbeat', async (req, res, next) => {
       data: { status: 'ONLINE', lastSeenAt: new Date() },
     });
     res.json({ ok: true });
-  } catch (err) { next(err); }
+  } catch (err) {
+    next(err);
+  }
 });
 
 module.exports = router;
