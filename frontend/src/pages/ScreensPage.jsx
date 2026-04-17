@@ -1,123 +1,249 @@
-import { useEffect, useState } from 'react'
-import api from '../lib/api'
+import { useEffect, useState } from "react";
+import api from "../lib/api";
 
 export default function ScreensPage() {
-  const [screens, setScreens] = useState([])
-  const [playlists, setPlaylists] = useState([])
-  const [selectedScreen, setSelectedScreen] = useState(null)
+  const [screens, setScreens] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
+  const [selectedScreen, setSelectedScreen] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const loadData = async () => {
-    const [screensRes, playlistsRes] = await Promise.all([
-      api.get('/screens'),
-      api.get('/playlists')
-    ])
+    try {
+      setLoading(true);
 
-    setScreens(screensRes.data)
-    setPlaylists(playlistsRes.data)
-  }
+      const [screensRes, playlistsRes] = await Promise.all([
+        api.get("/screens"),
+        api.get("/playlists"),
+      ]);
+
+      setScreens(screensRes.data || []);
+      setPlaylists(playlistsRes.data || []);
+    } catch (error) {
+      console.error("Erro ao carregar telas/playlists:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    loadData()
-  }, [])
+    loadData();
+  }, []);
 
   const addPlaylist = async (screenId, playlistId) => {
-    await api.post(`/screens/${screenId}/playlists`, { playlistId })
-    await loadData()
-  }
+    try {
+      await api.post(`/screens/${screenId}/playlists`, { playlistId });
+      await loadData();
+    } catch (error) {
+      console.error("Erro ao vincular playlist:", error);
+      alert("Erro ao vincular playlist.");
+    }
+  };
 
   const removePlaylist = async (screenId, playlistId) => {
-    await api.delete(`/screens/${screenId}/playlists/${playlistId}`)
-    await loadData()
+    try {
+      await api.delete(`/screens/${screenId}/playlists/${playlistId}`);
+      await loadData();
+    } catch (error) {
+      console.error("Erro ao remover playlist:", error);
+      alert("Erro ao remover playlist.");
+    }
+  };
+
+  const copyPlayerLink = async (screen) => {
+    try {
+      const url = `${window.location.origin}/player/${screen.shareToken}`;
+      await navigator.clipboard.writeText(url);
+      alert("Link copiado com sucesso.");
+    } catch (error) {
+      console.error("Erro ao copiar link:", error);
+      alert("Não foi possível copiar o link.");
+    }
+  };
+
+  const openPlayer = (screen) => {
+    const url = `${window.location.origin}/player/${screen.shareToken}`;
+    window.open(url, "_blank");
+  };
+
+  const deleteScreen = async (screenId) => {
+    const confirmed = window.confirm("Deseja realmente excluir esta tela?");
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/screens/${screenId}`);
+      await loadData();
+    } catch (error) {
+      console.error("Erro ao excluir tela:", error);
+      alert("Erro ao excluir tela.");
+    }
+  };
+
+  const getActivePlaylistName = (screen) => {
+    if (!screen.playlists || screen.playlists.length === 0) {
+      return "Nenhuma playlist vinculada";
+    }
+
+    return screen.playlists
+      .map((p) => p.playlist?.name)
+      .filter(Boolean)
+      .join(", ");
+  };
+
+  const isPlaylistLinked = (screen, playlistId) => {
+    if (!screen?.playlists) return false;
+    return screen.playlists.some((p) => p.playlist?.id === playlistId);
+  };
+
+  if (loading) {
+    return (
+      <div className="p-8">
+        <h1 className="text-3xl font-bold text-slate-900">Telas</h1>
+        <p className="mt-2 text-slate-500">Carregando telas...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4">Telas</h1>
+    <div className="p-8">
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-slate-900">Telas</h1>
+          <p className="mt-2 text-lg text-slate-500">
+            {screens.length} monitores cadastrados
+          </p>
+        </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        {screens.map(screen => (
-          <div key={screen.id} className="border rounded p-4">
-            <h2 className="font-bold">{screen.name}</h2>
+        <button className="rounded-2xl bg-violet-600 px-6 py-4 text-lg font-semibold text-white shadow-sm transition hover:bg-violet-700">
+          + Nova tela
+        </button>
+      </div>
 
-            <div className="mt-2 text-sm">
-              <b>Playlists ativas:</b>
-
-              {screen.playlists.length === 0 && (
-                <div className="text-gray-400">Nenhuma</div>
-              )}
-
-              {screen.playlists.map(p => (
-                <div key={p.playlist.id} className="flex items-center justify-between">
-                  <span>{p.playlist.name}</span>
-
-                  <button
-                    onClick={() => removePlaylist(screen.id, p.playlist.id)}
-                    className="text-red-500 text-xs"
-                  >
-                    remover
-                  </button>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        {screens.map((screen) => (
+          <div
+            key={screen.id}
+            className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+          >
+            <div className="mb-5 flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-2xl">
+                  🖥️
                 </div>
-              ))}
+
+                <div>
+                  <h2 className="text-3xl font-bold text-slate-900">
+                    {screen.name}
+                  </h2>
+                  <p className="mt-1 text-xl text-slate-400">
+                    {screen.location || "Sem localização"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-full bg-emerald-50 px-4 py-2 text-lg font-medium text-emerald-600">
+                📶 Online
+              </div>
             </div>
 
-            <button
-              onClick={() => setSelectedScreen(screen)}
-              className="mt-3 bg-blue-500 text-white px-3 py-1 rounded"
-            >
-              Vincular playlist
-            </button>
+            <div className="mb-5 rounded-2xl bg-slate-50 p-5">
+              <p className="mb-2 text-lg text-slate-400">Playlist ativa</p>
+              <p className="text-3xl font-semibold text-slate-800">
+                {getActivePlaylistName(screen)}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedScreen(screen)}
+                className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-xl font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                🔗 Vincular playlist
+              </button>
+
+              <button
+                onClick={() => copyPlayerLink(screen)}
+                className="rounded-2xl border border-slate-200 p-4 text-xl text-slate-600 transition hover:bg-slate-50"
+                title="Copiar link do player"
+              >
+                📋
+              </button>
+
+              <button
+                onClick={() => openPlayer(screen)}
+                className="rounded-2xl border border-slate-200 p-4 text-xl text-slate-600 transition hover:bg-slate-50"
+                title="Abrir player"
+              >
+                ↗
+              </button>
+
+              <button
+                onClick={() => deleteScreen(screen.id)}
+                className="rounded-2xl border border-red-200 p-4 text-xl text-red-500 transition hover:bg-red-50"
+                title="Excluir tela"
+              >
+                🗑️
+              </button>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* MODAL */}
       {selectedScreen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-          <div className="bg-white p-6 rounded w-96">
-            <h2 className="font-bold mb-4">
-              Vincular playlist — {selectedScreen.name}
-            </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
+          <div className="w-full max-w-2xl rounded-3xl bg-white p-8 shadow-2xl">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-3xl font-bold text-slate-900">
+                Vincular playlist — {selectedScreen.name}
+              </h3>
 
-            {playlists.map(pl => {
-              const isLinked = selectedScreen.playlists.some(
-                p => p.playlist.id === pl.id
-              )
+              <button
+                onClick={() => setSelectedScreen(null)}
+                className="text-3xl text-slate-400 transition hover:text-slate-600"
+              >
+                ×
+              </button>
+            </div>
 
-              return (
-                <div
-                  key={pl.id}
-                  className="flex justify-between items-center mb-2 border p-2 rounded"
-                >
-                  <span>{pl.name}</span>
+            <div className="space-y-4">
+              {playlists.map((playlist) => {
+                const linked = isPlaylistLinked(selectedScreen, playlist.id);
 
-                  {isLinked ? (
-                    <button
-                      onClick={() => removePlaylist(selectedScreen.id, pl.id)}
-                      className="text-red-500"
-                    >
-                      Remover
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => addPlaylist(selectedScreen.id, pl.id)}
-                      className="text-green-600"
-                    >
-                      Adicionar
-                    </button>
-                  )}
-                </div>
-              )
-            })}
+                return (
+                  <div
+                    key={playlist.id}
+                    className="flex items-center justify-between rounded-2xl border border-slate-200 p-5"
+                  >
+                    <div>
+                      <p className="text-2xl font-semibold text-slate-900">
+                        {playlist.name}
+                      </p>
+                      <p className="mt-1 text-lg text-slate-400">
+                        {playlist.items?.length || 0} itens
+                      </p>
+                    </div>
 
-            <button
-              onClick={() => setSelectedScreen(null)}
-              className="mt-4 w-full bg-gray-300 py-2 rounded"
-            >
-              Fechar
-            </button>
+                    {linked ? (
+                      <button
+                        onClick={() => removePlaylist(selectedScreen.id, playlist.id)}
+                        className="rounded-xl border border-red-200 px-4 py-2 text-lg font-medium text-red-500 transition hover:bg-red-50"
+                      >
+                        Remover
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => addPlaylist(selectedScreen.id, playlist.id)}
+                        className="rounded-xl border border-violet-200 px-4 py-2 text-2xl font-medium text-violet-600 transition hover:bg-violet-50"
+                      >
+                        +
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }
