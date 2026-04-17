@@ -17,25 +17,23 @@
   ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 99px; }
 }
 
-/* 🔥 ANIMAÇÃO MAIS SUAVE */
-@keyframes marquee {
+/* 🔥 SCROLL SUAVE PARA NOTÍCIAS GRANDES */
+@keyframes news-scroll {
   0% {
     transform: translateX(100%);
   }
+  10% {
+    transform: translateX(0%);
+  }
+  90% {
+    transform: translateX(calc(-100% + 60vw));
+  }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(calc(-100% + 60vw));
   }
 }
 
-/* 🚀 TICKER OTIMIZADO */
-.animate-marquee {
-  display: inline-block;
-  white-space: nowrap;
-  padding-left: 100%;
-  animation: marquee 60s linear infinite; /* 🔥 MAIS LENTO */
-}
-
-/* 👇 OPCIONAL: pausa ao passar o mouse */
-.animate-marquee:hover {
-  animation-play-state: paused;
+.animate-news-scroll {
+  animation: news-scroll 10s linear forwards;
+  will-change: transform;
 }

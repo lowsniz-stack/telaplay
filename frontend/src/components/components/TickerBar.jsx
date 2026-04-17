@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../../lib/api";
 
 export default function TickerBar() {
@@ -6,6 +6,10 @@ export default function TickerBar() {
   const [prices, setPrices] = useState({ usd: "R$ --", btc: "R$ --" });
   const [news, setNews] = useState(["Carregando notícias..."]);
   const [newsIndex, setNewsIndex] = useState(0);
+  const [isLongNews, setIsLongNews] = useState(false);
+
+  const newsTextRef = useRef(null);
+  const newsBoxRef = useRef(null);
 
   // Hora atual
   useEffect(() => {
@@ -83,7 +87,7 @@ export default function TickerBar() {
     };
 
     fetchNews();
-    const interval = setInterval(fetchNews, 600000); // 10 min
+    const interval = setInterval(fetchNews, 600000);
 
     return () => clearInterval(interval);
   }, []);
@@ -99,26 +103,63 @@ export default function TickerBar() {
     return () => clearInterval(interval);
   }, [news]);
 
+  // Detecta se a notícia é longa
+  useEffect(() => {
+    const checkIfLong = () => {
+      if (!newsTextRef.current || !newsBoxRef.current) return;
+
+      const textWidth = newsTextRef.current.scrollWidth;
+      const boxWidth = newsBoxRef.current.clientWidth;
+
+      setIsLongNews(textWidth > boxWidth);
+    };
+
+    const timeout = setTimeout(checkIfLong, 100);
+    window.addEventListener("resize", checkIfLong);
+
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener("resize", checkIfLong);
+    };
+  }, [newsIndex, news]);
+
   const currentNews = news[newsIndex] || "Carregando notícias...";
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-black/90 text-white text-sm flex items-center px-4 py-2 z-50">
-      {/* Esquerda */}
-      <div className="flex gap-4 min-w-[260px] font-medium">
-        <span>Dólar: {prices.usd}</span>
-        <span>Bitcoin: {prices.btc}</span>
-      </div>
-
-      {/* Centro */}
-      <div className="flex-1 mx-4 overflow-hidden">
-        <div className="text-center font-medium truncate">
-          {currentNews}
+    <div className="fixed bottom-0 left-0 w-full bg-black/90 text-white z-50">
+      <div className="flex items-center px-4 py-2 text-sm">
+        {/* Esquerda */}
+        <div className="flex gap-4 min-w-[260px] font-medium">
+          <span>Dólar: {prices.usd}</span>
+          <span>Bitcoin: {prices.btc}</span>
         </div>
-      </div>
 
-      {/* Direita */}
-      <div className="min-w-[110px] text-right font-semibold">
-        {time.toLocaleTimeString("pt-BR")}
+        {/* Centro */}
+        <div
+          ref={newsBoxRef}
+          className="flex-1 mx-4 overflow-hidden relative h-[40px] flex items-center"
+        >
+          {isLongNews ? (
+            <div
+              ref={newsTextRef}
+              className="whitespace-nowrap inline-block animate-news-scroll"
+            >
+              {currentNews}
+            </div>
+          ) : (
+            <div
+              ref={newsTextRef}
+              className="w-full text-center font-medium leading-tight line-clamp-2"
+            >
+              {currentNews}
+            </div>
+          )}
+        </div>
+
+        {/* Direita */}
+        <div className="min-w-[110px] text-right font-semibold">
+          {time.toLocaleTimeString("pt-BR")}
+        </div>
       </div>
     </div>
   );
