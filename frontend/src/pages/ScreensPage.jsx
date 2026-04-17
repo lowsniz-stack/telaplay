@@ -117,7 +117,6 @@ export default function ScreensPage() {
         return;
       }
 
-      // pega companyId da primeira playlist, se existir
       let fallbackCompanyId = "";
       const firstPlaylistWithCompany = playlists.find((p) => p.companyId);
       if (firstPlaylistWithCompany) {
@@ -172,7 +171,7 @@ export default function ScreensPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-5">
         <h1 className="text-3xl font-bold text-slate-900">Telas</h1>
         <p className="mt-2 text-slate-500">Carregando telas...</p>
       </div>
@@ -180,38 +179,38 @@ export default function ScreensPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-start justify-between">
+    <div className="p-5">
+      <div className="mb-5 flex items-start justify-between">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Telas</h1>
-          <p className="mt-2 text-base text-slate-500">
+          <p className="mt-1 text-sm text-slate-500">
             {screens.length} monitores cadastrados
           </p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="rounded-2xl bg-violet-600 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-violet-700"
+          className="rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700"
         >
           + Nova tela
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         {screens.map((screen) => (
           <div
             key={screen.id}
-            className="h-[320px] rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md flex flex-col justify-between"
+            className="h-[270px] rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_rgba(15,23,42,0.05)] transition hover:shadow-[0_6px_18px_rgba(15,23,42,0.08)] flex flex-col justify-between"
           >
             <div>
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div className="flex items-start gap-3 min-w-0">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-xl">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-lg">
                     🖥️
                   </div>
 
                   <div className="min-w-0">
-                    <h2 className="text-xl font-bold leading-tight text-slate-900 break-words">
+                    <h2 className="text-lg font-bold leading-tight text-slate-900 break-words">
                       {screen.name}
                     </h2>
                     <p className="mt-1 text-sm text-slate-400 break-words">
@@ -220,30 +219,32 @@ export default function ScreensPage() {
                   </div>
                 </div>
 
-                <div className="shrink-0 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600">
+                <div className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600">
                   📶 Online
                 </div>
               </div>
 
-              <div className="rounded-2xl bg-slate-50 p-4 min-h-[110px]">
-                <p className="mb-2 text-sm text-slate-400">Playlist ativa</p>
-                <p className="text-lg font-semibold leading-snug text-slate-800 break-words">
+              <div className="rounded-2xl bg-slate-50/90 p-3.5 min-h-[88px]">
+                <p className="mb-1.5 text-xs uppercase tracking-wide text-slate-400">
+                  Playlist ativa
+                </p>
+                <p className="text-base font-semibold leading-snug text-slate-800 break-words">
                   {getActivePlaylistName(screen)}
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 flex items-center gap-2.5">
+            <div className="mt-3 flex items-center gap-2">
               <button
                 onClick={() => setSelectedScreen(screen)}
-                className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
                 🔗 Vincular playlist
               </button>
 
               <button
                 onClick={() => copyPlayerLink(screen)}
-                className="rounded-2xl border border-slate-200 p-3 text-base text-slate-600 transition hover:bg-slate-50"
+                className="rounded-2xl border border-slate-200 p-2.5 text-sm text-slate-600 transition hover:bg-slate-50"
                 title="Copiar link do player"
               >
                 📋
@@ -251,7 +252,7 @@ export default function ScreensPage() {
 
               <button
                 onClick={() => openPlayer(screen)}
-                className="rounded-2xl border border-slate-200 p-3 text-base text-slate-600 transition hover:bg-slate-50"
+                className="rounded-2xl border border-slate-200 p-2.5 text-sm text-slate-600 transition hover:bg-slate-50"
                 title="Abrir player"
               >
                 ↗
@@ -259,7 +260,7 @@ export default function ScreensPage() {
 
               <button
                 onClick={() => deleteScreen(screen.id)}
-                className="rounded-2xl border border-red-200 p-3 text-base text-red-500 transition hover:bg-red-50"
+                className="rounded-2xl border border-red-200 p-2.5 text-sm text-red-500 transition hover:bg-red-50"
                 title="Excluir tela"
               >
                 🗑️
@@ -271,9 +272,9 @@ export default function ScreensPage() {
 
       {selectedScreen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
-          <div className="w-full max-w-2xl rounded-3xl bg-white p-7 shadow-2xl">
-            <div className="mb-5 flex items-center justify-between">
-              <h3 className="text-2xl font-bold text-slate-900">
+          <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-slate-900">
                 Vincular playlist — {selectedScreen.name}
               </h3>
 
@@ -295,7 +296,7 @@ export default function ScreensPage() {
                     className="flex items-center justify-between rounded-2xl border border-slate-200 p-4"
                   >
                     <div>
-                      <p className="text-lg font-semibold text-slate-900">
+                      <p className="text-base font-semibold text-slate-900">
                         {playlist.name}
                       </p>
                       <p className="mt-1 text-sm text-slate-400">
@@ -332,9 +333,9 @@ export default function ScreensPage() {
 
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4">
-          <div className="w-full max-w-xl rounded-3xl bg-white p-7 shadow-2xl">
-            <div className="mb-5 flex items-center justify-between">
-              <h3 className="text-2xl font-bold text-slate-900">
+          <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-slate-900">
                 Nova tela
               </h3>
 
