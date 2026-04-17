@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -16,6 +17,7 @@ const playlistRoutes = require('./routes/playlists');
 const screenRoutes = require('./routes/screens');
 const playerRoutes = require('./routes/player');
 const logRoutes = require('./routes/logs');
+const newsRoutes = require('./routes/news');
 
 const { errorHandler } = require('./middleware/errorHandler');
 const { setupWebSocket } = require('./utils/websocket');
@@ -25,16 +27,27 @@ const server = createServer(app);
 const prisma = new PrismaClient();
 
 // WebSocket
-const wss = new WebSocketServer({ server, path: '/ws' });
+const wss = new WebSocketServer({
+  server,
+  path: '/ws',
+});
 setupWebSocket(wss);
 app.set('wss', wss);
 
 // Segurança
-app.use(helmet({ contentSecurityPolicy: false }));
-app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
-  credentials: true,
-}));
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
+
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || '*',
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -49,10 +62,13 @@ app.use('/api', limiter);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+  });
 });
 
-// Rotas
+// Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/media', mediaRoutes);
@@ -60,28 +76,33 @@ app.use('/api/playlists', playlistRoutes);
 app.use('/api/screens', screenRoutes);
 app.use('/api/player', playerRoutes);
 app.use('/api/logs', logRoutes);
+app.use('/api/news', newsRoutes);
 
-// Erros
+// Middleware de erro
 app.use(errorHandler);
 
-// 🚀 CRIAR / ATUALIZAR ADMIN (FIX DEFINITIVO)
+// Criar / atualizar admin padrão
 async function createAdmin() {
-  const hash = await bcrypt.hash('admin123', 10);
+  try {
+    const hash = await bcrypt.hash('admin123', 10);
 
-  await prisma.user.upsert({
-    where: { email: 'admin@telaplay.com' },
-    update: {
-      password: hash,
-    },
-    create: {
-      email: 'admin@telaplay.com',
-      password: hash,
-      name: 'Administrador',
-      role: 'ADMIN'
-    }
-  });
+    await prisma.user.upsert({
+      where: { email: 'admin@telaplay.com' },
+      update: {
+        password: hash,
+      },
+      create: {
+        email: 'admin@telaplay.com',
+        password: hash,
+        name: 'Administrador',
+        role: 'ADMIN',
+      },
+    });
 
-  console.log('✅ Admin atualizado/criado!');
+    console.log('✅ Admin atualizado/criado!');
+  } catch (error) {
+    console.error('❌ Erro ao criar admin:', error);
+  }
 }
 
 createAdmin();
