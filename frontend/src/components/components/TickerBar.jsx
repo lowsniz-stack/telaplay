@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
+import api from "../../lib/api";
 
 export default function TickerBar() {
   const [time, setTime] = useState(new Date());
-  const [prices, setPrices] = useState({ usd: "R$ --", btc: "BTC --" });
+  const [prices, setPrices] = useState({ usd: "R$ --", btc: "R$ --" });
   const [news, setNews] = useState(["Carregando notícias..."]);
-
-  const GNEWS_API_KEY = import.meta.env.VITE_GNEWS_API_KEY;
 
   // Hora atual
   useEffect(() => {
@@ -16,7 +15,7 @@ export default function TickerBar() {
     return () => clearInterval(interval);
   }, []);
 
-  // Buscar dólar e bitcoin
+  // Dólar e Bitcoin
   useEffect(() => {
     const fetchPrices = async () => {
       try {
@@ -58,39 +57,23 @@ export default function TickerBar() {
     return () => clearInterval(interval);
   }, []);
 
-  // Buscar notícias reais
+  // Notícias reais pelo backend
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        if (!GNEWS_API_KEY) {
-          setNews([
-            "Chave da GNews não configurada",
-            "Defina VITE_GNEWS_API_KEY no arquivo .env",
-          ]);
-          return;
-        }
+        const { data } = await api.get("/news");
 
-        const res = await fetch(
-          `https://gnews.io/api/v4/top-headlines?lang=pt&country=br&max=10&apikey=${GNEWS_API_KEY}`
-        );
-
-        const data = await res.json();
-
-        if (!data.articles || !Array.isArray(data.articles) || data.articles.length === 0) {
+        if (!data.news || !Array.isArray(data.news) || data.news.length === 0) {
           setNews(["Nenhuma notícia disponível no momento"]);
           return;
         }
 
-        const titles = data.articles
-          .map((item) => item.title)
-          .filter(Boolean);
-
-        setNews(titles);
+        setNews(data.news);
       } catch (error) {
         console.error("Erro ao buscar notícias:", error);
         setNews([
           "Erro ao carregar notícias",
-          "Verifique a conexão ou a chave da API",
+          "Verifique a conexão com o backend",
         ]);
       }
     };
@@ -99,24 +82,21 @@ export default function TickerBar() {
     const interval = setInterval(fetchNews, 600000); // 10 min
 
     return () => clearInterval(interval);
-  }, [GNEWS_API_KEY]);
+  }, []);
 
   return (
     <div className="fixed bottom-0 left-0 w-full bg-black/90 text-white text-sm flex items-center px-4 py-2 z-50">
-      {/* Esquerda */}
       <div className="flex gap-4 min-w-[260px] font-medium">
         <span>Dólar: {prices.usd}</span>
         <span>Bitcoin: {prices.btc}</span>
       </div>
 
-      {/* Centro */}
       <div className="flex-1 overflow-hidden mx-4">
         <div className="whitespace-nowrap animate-marquee">
           {news.join(" • ")}
         </div>
       </div>
 
-      {/* Direita */}
       <div className="min-w-[110px] text-right font-semibold">
         {time.toLocaleTimeString("pt-BR")}
       </div>
