@@ -111,10 +111,17 @@
 }
 
 .ticker-quote-value {
-  color: #ffffff;
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.01em;
+}
+
+.ticker-quote-value.up {
+  color: #22c55e;
+}
+
+.ticker-quote-value.down {
+  color: #ef4444;
 }
 
 /* notícias */
@@ -140,7 +147,7 @@
   white-space: nowrap;
   min-width: 100%;
   padding-left: 100%;
-  animation: ticker-news-scroll 45s linear infinite;
+  animation: ticker-news-scroll 90s linear infinite;
   will-change: transform;
 }
 

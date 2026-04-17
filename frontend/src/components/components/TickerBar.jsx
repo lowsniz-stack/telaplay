@@ -5,6 +5,8 @@ export default function TickerBar() {
   const [time, setTime] = useState(new Date());
   const [usd, setUsd] = useState("R$ --");
   const [btc, setBtc] = useState("R$ --");
+  const [usdChange, setUsdChange] = useState(0);
+  const [btcChange, setBtcChange] = useState(0);
   const [weather, setWeather] = useState({
     temp: "--°C",
     city: "Goiânia - GO",
@@ -27,12 +29,21 @@ export default function TickerBar() {
         const usdData = await usdRes.json();
         const btcData = await btcRes.json();
 
-        setUsd(`R$ ${Number(usdData.USDBRL.bid).toFixed(2)}`);
+        const usdValue = Number(usdData.USDBRL.bid);
+        const usdPct = Number(usdData.USDBRL.pctChange);
+
+        const btcValue = Number(btcData.BTCBRL.bid);
+        const btcPct = Number(btcData.BTCBRL.pctChange);
+
+        setUsd(`R$ ${usdValue.toFixed(2)}`);
+        setUsdChange(usdPct);
+
         setBtc(
-          `R$ ${Number(btcData.BTCBRL.bid).toLocaleString("pt-BR", {
+          `R$ ${btcValue.toLocaleString("pt-BR", {
             maximumFractionDigits: 0,
           })}`
         );
+        setBtcChange(btcPct);
       } catch (error) {
         console.error("Erro ao buscar preços:", error);
       }
@@ -96,12 +107,24 @@ export default function TickerBar() {
 
         <div className="ticker-quote-block">
           <span className="ticker-quote-label">DÓLAR</span>
-          <span className="ticker-quote-value">{usd}</span>
+          <span
+            className={`ticker-quote-value ${
+              usdChange >= 0 ? "up" : "down"
+            }`}
+          >
+            {usd}
+          </span>
         </div>
 
         <div className="ticker-quote-block">
           <span className="ticker-quote-label">BITCOIN</span>
-          <span className="ticker-quote-value">{btc}</span>
+          <span
+            className={`ticker-quote-value ${
+              btcChange >= 0 ? "up" : "down"
+            }`}
+          >
+            {btc}
+          </span>
         </div>
 
         <div className="ticker-divider" />
