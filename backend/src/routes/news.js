@@ -1,5 +1,4 @@
 const express = require('express');
-const axios = require('axios'); // 🔥 FALTAVA ISSO
 
 const router = express.Router();
 
@@ -11,12 +10,19 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: 'GNEWS_API_KEY não configurada' });
     }
 
-    const response = await axios.get(
+    const response = await fetch(
       `https://gnews.io/api/v4/top-headlines?lang=pt&country=br&max=10&apikey=${apiKey}`
     );
 
-    const articles = response.data.articles || [];
+    const data = await response.json();
 
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data?.errors?.join(', ') || data?.message || 'Erro ao buscar notícias',
+      });
+    }
+
+    const articles = data.articles || [];
     const news = articles.map((item) => item.title).filter(Boolean);
 
     res.json({ news });
