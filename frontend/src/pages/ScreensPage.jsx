@@ -182,7 +182,9 @@ export default function ScreensPage() {
     <div className="p-5">
       <div className="mb-5 flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Telas</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            Telas
+          </h1>
           <p className="mt-1 text-sm text-slate-500">
             {screens.length} monitores cadastrados
           </p>
@@ -190,7 +192,7 @@ export default function ScreensPage() {
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="rounded-2xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700"
+          className="rounded-2xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700"
         >
           + Nova tela
         </button>
@@ -200,17 +202,17 @@ export default function ScreensPage() {
         {screens.map((screen) => (
           <div
             key={screen.id}
-            className="h-[270px] rounded-3xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_16px_rgba(15,23,42,0.05)] transition hover:shadow-[0_6px_18px_rgba(15,23,42,0.08)] flex flex-col justify-between"
+            className="h-[220px] rounded-[28px] border border-slate-200/70 bg-white px-4 py-4 shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition hover:shadow-[0_6px_18px_rgba(15,23,42,0.06)] flex flex-col justify-between"
           >
             <div>
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-lg">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-sm">
                     🖥️
                   </div>
 
                   <div className="min-w-0">
-                    <h2 className="text-lg font-bold leading-tight text-slate-900 break-words">
+                    <h2 className="text-[18px] font-semibold leading-tight text-slate-900 break-words">
                       {screen.name}
                     </h2>
                     <p className="mt-1 text-sm text-slate-400 break-words">
@@ -220,15 +222,15 @@ export default function ScreensPage() {
                 </div>
 
                 <div className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600">
-                  📶 Online
+                  ● Online
                 </div>
               </div>
 
-              <div className="rounded-2xl bg-slate-50/90 p-3.5 min-h-[88px]">
-                <p className="mb-1.5 text-xs uppercase tracking-wide text-slate-400">
+              <div className="rounded-2xl bg-slate-50/80 px-4 py-3 min-h-[72px]">
+                <p className="mb-1 text-[11px] uppercase tracking-[0.08em] text-slate-400">
                   Playlist ativa
                 </p>
-                <p className="text-base font-semibold leading-snug text-slate-800 break-words">
+                <p className="text-[15px] font-semibold leading-snug text-slate-800 break-words">
                   {getActivePlaylistName(screen)}
                 </p>
               </div>
@@ -237,9 +239,9 @@ export default function ScreensPage() {
             <div className="mt-3 flex items-center gap-2">
               <button
                 onClick={() => setSelectedScreen(screen)}
-                className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="flex-1 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
-                🔗 Vincular playlist
+                🔗 Vincular
               </button>
 
               <button
