@@ -2,59 +2,153 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Inter, sans-serif;
+@layer base {
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 99px; }
 }
 
-/* CONTAINER */
+/* ===== TICKER PREMIUM ===== */
 .ticker-shell {
   position: fixed;
-  left: 20px;
-  right: 20px;
+  left: 22px;
+  right: 22px;
   bottom: 14px;
   z-index: 60;
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
-  background: rgba(15, 20, 30, 0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(180deg, rgba(12, 20, 32, 0.96), rgba(10, 15, 25, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
 }
 
-/* LINHA PRINCIPAL */
-.ticker-main {
+.ticker-top {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
+  min-height: 58px;
   padding: 10px 16px;
-  font-size: 13px;
-  color: #fff;
 }
 
-/* ITENS */
-.ticker-item {
-  opacity: 0.9;
-  white-space: nowrap;
+.ticker-bottom {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: #c9d2de;
+  font-size: 12px;
+  text-align: center;
+  padding: 7px 12px;
+  letter-spacing: 0.01em;
 }
 
-.ticker-item.strong {
+.ticker-divider {
+  width: 1px;
+  align-self: stretch;
+  background: rgba(255,255,255,0.08);
+}
+
+/* bloco esquerdo */
+.ticker-left-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+}
+
+.ticker-left-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #eef4fb;
+  font-size: 15px;
   font-weight: 700;
 }
 
-/* NOTÍCIAS */
-.ticker-news {
+.ticker-left-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.ticker-title {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.ticker-sub {
+  color: #93a3b8;
+  font-size: 11px;
+}
+
+/* blocos de valor */
+.ticker-quote-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 100px;
+  line-height: 1.1;
+}
+
+.ticker-quote-label {
+  color: #96a3b5;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.ticker-quote-value {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* notícias */
+.ticker-news-wrap {
   flex: 1;
   overflow: hidden;
+  min-width: 0;
+}
+
+@keyframes ticker-news-scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 .ticker-news-track {
   display: inline-flex;
+  align-items: center;
   gap: 30px;
   white-space: nowrap;
-  animation: scroll 40s linear infinite;
+  min-width: 100%;
+  padding-left: 100%;
+  animation: ticker-news-scroll 45s linear infinite;
+  will-change: transform;
 }
 
 .ticker-news-item {
   position: relative;
+  color: #eef3f8;
+  font-size: 14px;
+  font-weight: 500;
   padding-left: 14px;
 }
 
@@ -62,32 +156,48 @@ body {
   content: "•";
   position: absolute;
   left: 0;
-  color: #27d17f;
+  top: 0;
+  color: #22c55e;
+  font-size: 16px;
+  line-height: 1;
 }
 
-/* ANIMAÇÃO */
-@keyframes scroll {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+/* clima */
+.ticker-weather-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 105px;
+  line-height: 1.05;
 }
 
-/* MARCA */
-.ticker-brand {
-  font-weight: 700;
-  opacity: 0.9;
-}
-
-/* HORA */
-.ticker-clock {
+.ticker-weather-temp {
+  color: #ffffff;
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
+  margin-bottom: 3px;
 }
 
-/* LINHA INFERIOR */
-.ticker-footer {
+.ticker-weather-city {
+  color: #9caabd;
+  font-size: 11px;
+}
+
+/* marca */
+.ticker-brand {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  min-width: 105px;
   text-align: center;
-  font-size: 12px;
-  padding: 6px;
-  background: rgba(255,255,255,0.04);
-  color: #cbd5e1;
+  letter-spacing: -0.01em;
+}
+
+/* relógio */
+.ticker-clock {
+  color: #ffffff;
+  font-size: 26px;
+  font-weight: 800;
+  min-width: 82px;
+  text-align: right;
+  letter-spacing: -0.03em;
 }
