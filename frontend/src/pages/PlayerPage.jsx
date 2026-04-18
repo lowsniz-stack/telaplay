@@ -101,7 +101,7 @@ export default function PlayerPage() {
   const current = normalizedItems[currentIndex]?.media;
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-black relative">
+    <div className="relative h-screen w-screen overflow-hidden bg-black">
       <div
         className={`absolute inset-0 transition-opacity duration-500 ${
           fade ? "opacity-100" : "opacity-0"
@@ -126,15 +126,15 @@ export default function PlayerPage() {
         )}
       </div>
 
-      {/* QR CODE FIXO */}
-      <div className="absolute bottom-24 right-6 z-50">
-        <div className="rounded-2xl border border-white/10 bg-black/70 p-3 shadow-lg backdrop-blur-md">
+      {/* QR CODE PREMIUM */}
+      <div className="absolute bottom-32 right-6 z-50">
+        <div className="rounded-xl border border-white/10 bg-black/60 p-2 shadow-lg backdrop-blur-md">
           <img
             src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://w.app/telaplay"
             alt="QR Code para contato"
-            className="h-24 w-24 rounded-lg bg-white p-1"
+            className="h-20 w-20 rounded-md bg-white p-1"
           />
-          <p className="mt-2 max-w-24 text-center text-[11px] font-medium leading-tight text-white">
+          <p className="mt-1 text-center text-[10px] text-white opacity-80">
             Anuncie aqui
           </p>
         </div>
