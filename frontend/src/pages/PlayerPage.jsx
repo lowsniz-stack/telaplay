@@ -4,8 +4,13 @@ import api from "../lib/api";
 import TickerBar from "../components/components/TickerBar";
 
 export default function PlayerPage() {
-  const { token, id } = useParams();
-  const screenToken = token || id;
+  const params = useParams();
+  const screenToken =
+    params.token ||
+    params.id ||
+    params.shareToken ||
+    params.screenToken ||
+    Object.values(params)[0];
 
   const [items, setItems] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -14,30 +19,14 @@ export default function PlayerPage() {
 
   const normalizedItems = useMemo(() => {
     return items
-      .map((item) => {
-        if (item?.media) {
-          return {
-            ...item,
-            media: {
-              ...item.media,
-              type: item.media.type || item.media.mimeType || "",
-              url:
-                item.media.url ||
-                item.media.fileUrl ||
-                item.media.path ||
-                "",
-            },
-          };
-        }
-
-        return {
-          ...item,
-          media: {
-            type: item?.type || item?.mimeType || "",
-            url: item?.url || item?.fileUrl || item?.path || "",
-          },
-        };
-      })
+      .map((item) => ({
+        ...item,
+        media: {
+          ...item.media,
+          type: String(item?.media?.type || "").toLowerCase(),
+          url: item?.media?.url || "",
+        },
+      }))
       .filter((item) => item?.media?.url);
   }, [items]);
 
@@ -46,15 +35,14 @@ export default function PlayerPage() {
       try {
         setLoading(true);
 
-        const res = await api.get(`/player/${screenToken}`);
-        const data = res.data;
+        if (!screenToken) {
+          console.error("Token da tela não encontrado na rota.");
+          setItems([]);
+          return;
+        }
 
-        const mediaItems =
-          data?.items ||
-          data?.playlist?.items ||
-          data?.screen?.items ||
-          data?.screen?.playlist?.items ||
-          [];
+        const res = await api.get(`/player/${screenToken}`);
+        const mediaItems = res.data?.items || [];
 
         setItems(Array.isArray(mediaItems) ? mediaItems : []);
       } catch (err) {
@@ -65,23 +53,21 @@ export default function PlayerPage() {
       }
     };
 
-    if (screenToken) {
-      load();
-    }
+    load();
   }, [screenToken]);
 
   useEffect(() => {
     if (normalizedItems.length === 0) return;
 
     const currentItem = normalizedItems[currentIndex];
-    const mediaType = String(currentItem?.media?.type || "").toLowerCase();
+    const mediaType = currentItem?.media?.type || "";
 
     let duration = 10000;
 
     if (mediaType.includes("video")) {
-      duration = currentItem?.duration || 15000;
+      duration = (currentItem?.duration || 15) * 1000;
     } else {
-      duration = currentItem?.duration || 10000;
+      duration = (currentItem?.duration || 10) * 1000;
     }
 
     const timer = setTimeout(() => {
@@ -113,38 +99,34 @@ export default function PlayerPage() {
   }
 
   const current = normalizedItems[currentIndex]?.media;
-  const mediaType = String(current?.type || "").toLowerCase();
-  const mediaUrl = current?.url || "";
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-black">
-      <div className="relative h-full w-full">
-        <div
-          className={`absolute inset-0 transition-opacity duration-500 ${
-            fade ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          {mediaType.includes("image") && (
-            <img
-              src={mediaUrl}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          )}
+    <div className="h-screen w-screen overflow-hidden bg-black relative">
+      <div
+        className={`absolute inset-0 transition-opacity duration-500 ${
+          fade ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        {current?.type.includes("image") && (
+          <img
+            src={current.url}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+        )}
 
-          {mediaType.includes("video") && (
-            <video
-              src={mediaUrl}
-              autoPlay
-              muted
-              playsInline
-              className="h-full w-full object-cover"
-            />
-          )}
-        </div>
-
-        <TickerBar />
+        {current?.type.includes("video") && (
+          <video
+            src={current.url}
+            autoPlay
+            muted
+            playsInline
+            className="h-full w-full object-cover"
+          />
+        )}
       </div>
+
+      <TickerBar />
     </div>
   );
 }
