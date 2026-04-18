@@ -15,9 +15,13 @@ export default function TickerBar() {
     icon: "⛅",
   });
 
-  const [news, setNews] = useState([
-    "Carregando notícias em tempo real...",
-  ]);
+  const fallbackNews = [
+    "TelaPlay: mídia digital inteligente para comércios locais",
+    "Anuncie sua empresa aqui e alcance clientes em tempo real",
+    "Notícias e índices são atualizados automaticamente",
+  ];
+
+  const [news, setNews] = useState(fallbackNews);
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -98,18 +102,20 @@ export default function TickerBar() {
   useEffect(() => {
     const NEWS_CACHE_KEY = "telaplay_news_cache";
 
-    const cachedNews = localStorage.getItem(NEWS_CACHE_KEY);
-    if (cachedNews) {
-      try {
+    // 1. tenta usar cache imediatamente
+    try {
+      const cachedNews = localStorage.getItem(NEWS_CACHE_KEY);
+      if (cachedNews) {
         const parsed = JSON.parse(cachedNews);
         if (Array.isArray(parsed) && parsed.length > 0) {
           setNews(parsed);
         }
-      } catch (error) {
-        console.error("Erro ao ler cache de notícias:", error);
       }
+    } catch (error) {
+      console.error("Erro ao ler cache de notícias:", error);
     }
 
+    // 2. busca as notícias reais em segundo plano
     const fetchNews = async () => {
       try {
         const { data } = await api.get("/news");
@@ -120,15 +126,11 @@ export default function TickerBar() {
         }
       } catch (error) {
         console.error("Erro ao buscar notícias:", error);
-
-        if (!cachedNews) {
-          setNews(["Notícias indisponíveis no momento"]);
-        }
       }
     };
 
     fetchNews();
-    const interval = setInterval(fetchNews, 180000); // 3 minutos
+    const interval = setInterval(fetchNews, 180000);
     return () => clearInterval(interval);
   }, []);
 
