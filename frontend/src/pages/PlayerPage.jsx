@@ -102,37 +102,29 @@ export default function PlayerPage() {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-black">
-      {/* SAFE AREA DO CONTEÚDO */}
-      <div className="absolute inset-0 px-10 pt-10 pb-32">
-        <div
-          className={`h-full w-full transition-opacity duration-500 ${
-            fade ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          {current?.type.includes("image") && (
-            <img
-              src={current.url}
-              alt=""
-              className="h-full w-full object-contain"
-            />
-          )}
+      <div
+        className={`absolute inset-0 transition-opacity duration-500 ${
+          fade ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        {current?.type.includes("image") && (
+          <img
+            src={current.url}
+            alt=""
+            className="h-full w-full object-cover"
+          />
+        )}
 
-          {current?.type.includes("video") && (
-            <video
-              src={current.url}
-              autoPlay
-              muted
-              playsInline
-              className="h-full w-full object-contain"
-            />
-          )}
-        </div>
+        {current?.type.includes("video") && (
+          <video
+            src={current.url}
+            autoPlay
+            muted
+            playsInline
+            className="h-full w-full object-cover"
+          />
+        )}
       </div>
-
-      {/* GUIA VISUAL OPCIONAL DA SAFE AREA */}
-      {/*
-      <div className="pointer-events-none absolute inset-0 m-10 mb-32 rounded-2xl border-2 border-white/20" />
-      */}
 
       {/* QR CODE PREMIUM */}
       <div className="absolute bottom-32 right-6 z-50">
