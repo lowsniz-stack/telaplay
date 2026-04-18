@@ -126,6 +126,20 @@ export default function PlayerPage() {
         )}
       </div>
 
+      {/* QR CODE FIXO */}
+      <div className="absolute bottom-24 right-6 z-50">
+        <div className="rounded-2xl border border-white/10 bg-black/70 p-3 shadow-lg backdrop-blur-md">
+          <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://w.app/telaplay"
+            alt="QR Code para contato"
+            className="h-24 w-24 rounded-lg bg-white p-1"
+          />
+          <p className="mt-2 max-w-24 text-center text-[11px] font-medium leading-tight text-white">
+            Anuncie aqui
+          </p>
+        </div>
+      </div>
+
       <TickerBar />
     </div>
   );
