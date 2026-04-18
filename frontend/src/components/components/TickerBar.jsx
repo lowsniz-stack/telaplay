@@ -15,7 +15,9 @@ export default function TickerBar() {
     icon: "⛅",
   });
 
-  const [news, setNews] = useState([]);
+  const [news, setNews] = useState([
+    "Carregando notícias em tempo real...",
+  ]);
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -94,18 +96,39 @@ export default function TickerBar() {
   }, []);
 
   useEffect(() => {
+    const NEWS_CACHE_KEY = "telaplay_news_cache";
+
+    const cachedNews = localStorage.getItem(NEWS_CACHE_KEY);
+    if (cachedNews) {
+      try {
+        const parsed = JSON.parse(cachedNews);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setNews(parsed);
+        }
+      } catch (error) {
+        console.error("Erro ao ler cache de notícias:", error);
+      }
+    }
+
     const fetchNews = async () => {
       try {
         const { data } = await api.get("/news");
-        setNews(data.news || []);
+
+        if (Array.isArray(data.news) && data.news.length > 0) {
+          setNews(data.news);
+          localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify(data.news));
+        }
       } catch (error) {
         console.error("Erro ao buscar notícias:", error);
-        setNews(["Erro ao carregar notícias"]);
+
+        if (!cachedNews) {
+          setNews(["Notícias indisponíveis no momento"]);
+        }
       }
     };
 
     fetchNews();
-    const interval = setInterval(fetchNews, 600000);
+    const interval = setInterval(fetchNews, 180000); // 3 minutos
     return () => clearInterval(interval);
   }, []);
 
