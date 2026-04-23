@@ -3,15 +3,21 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BarChart3,
   Monitor,
+  Clock,
   CalendarDays,
-  Image as ImageIcon,
   Film,
+  Image as ImageIcon,
   ScrollText,
 } from 'lucide-react';
 import api from '../lib/api';
 
 function formatDate(iso) {
-  return new Date(iso).toLocaleString('pt-BR', {
+  if (!iso) return '-';
+
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '-';
+
+  return date.toLocaleString('pt-BR', {
     day: '2-digit',
     month: '2-digit',
     year: '2-digit',
@@ -58,20 +64,32 @@ export default function LogsPage() {
   const [screenFilter, setScreenFilter] = useState('');
   const [period, setPeriod] = useState('7d');
 
-  const { data: screens = [] } = useQuery({
+  const {
+    data: screens = [],
+    isLoading: loadingScreens,
+  } = useQuery({
     queryKey: ['screens'],
-    queryFn: () => api.get('/screens').then((r) => r.data),
+    queryFn: async () => {
+      const res = await api.get('/screens');
+      return Array.isArray(res.data) ? res.data : [];
+    },
   });
 
-  const { data: logs = [], isLoading } = useQuery({
+  const {
+    data: logs = [],
+    isLoading: loadingLogs,
+  } = useQuery({
     queryKey: ['logs', screenFilter],
-    queryFn: () =>
-      api.get('/logs', {
+    queryFn: async () => {
+      const res = await api.get('/logs', {
         params: {
-          ...(screenFilter && { screenId: screenFilter }),
+          ...(screenFilter ? { screenId: screenFilter } : {}),
           limit: 500,
         },
-      }).then((r) => r.data),
+      });
+
+      return Array.isArray(res.data) ? res.data : [];
+    },
     refetchInterval: 20000,
   });
 
@@ -79,9 +97,13 @@ export default function LogsPage() {
     const startDate = getStartDate(period);
 
     return logs.filter((log) => {
-      if (log.event !== 'MEDIA_STARTED') return false;
+      if (!log || log.event !== 'MEDIA_STARTED') return false;
       if (!startDate) return true;
-      return new Date(log.createdAt) >= startDate;
+
+      const createdAt = new Date(log.createdAt);
+      if (Number.isNaN(createdAt.getTime())) return false;
+
+      return createdAt >= startDate;
     });
   }, [logs, period]);
 
@@ -90,8 +112,8 @@ export default function LogsPage() {
     const uniqueMedia = new Set();
 
     filteredLogs.forEach((log) => {
-      if (log.screenId) uniqueScreens.add(log.screenId);
-      if (log.metadata?.mediaId) uniqueMedia.add(log.metadata.mediaId);
+      if (log?.screenId) uniqueScreens.add(log.screenId);
+      if (log?.metadata?.mediaId) uniqueMedia.add(log.metadata.mediaId);
     });
 
     return {
@@ -105,11 +127,12 @@ export default function LogsPage() {
     const map = new Map();
 
     filteredLogs.forEach((log) => {
-      const mediaId = log.metadata?.mediaId || `sem-id-${log.id}`;
-      const mediaName = log.metadata?.mediaName || 'Mídia sem nome';
-      const mediaType = log.metadata?.mediaType || 'IMAGE';
-      const playlistName = log.metadata?.playlistName || '-';
-      const screenName = log.screen?.name || log.metadata?.screenName || '-';
+      const metadata = log?.metadata || {};
+      const mediaId = metadata.mediaId || `sem-id-${log.id}`;
+      const mediaName = metadata.mediaName || 'Mídia sem nome';
+      const mediaType = metadata.mediaType || 'IMAGE';
+      const playlistName = metadata.playlistName || '-';
+      const screenName = log?.screen?.name || metadata.screenName || '-';
 
       if (!map.has(mediaId)) {
         map.set(mediaId, {
@@ -127,8 +150,13 @@ export default function LogsPage() {
       item.totalExibicoes += 1;
       item.telas.add(screenName);
 
-      if (new Date(log.createdAt) > new Date(item.ultimaExibicao)) {
-        item.ultimaExibicao = log.createdAt;
+      const currentDate = new Date(log.createdAt);
+      const savedDate = new Date(item.ultimaExibicao);
+
+      if (!Number.isNaN(currentDate.getTime()) && !Number.isNaN(savedDate.getTime())) {
+        if (currentDate > savedDate) {
+          item.ultimaExibicao = log.createdAt;
+        }
       }
     });
 
@@ -145,6 +173,8 @@ export default function LogsPage() {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 20);
   }, [filteredLogs]);
+
+  const isLoading = loadingScreens || loadingLogs;
 
   return (
     <div className="p-8">
@@ -248,15 +278,12 @@ export default function LogsPage() {
         ) : (
           <div className="divide-y divide-gray-50">
             {groupedByMedia.map((item, index) => (
-              <div
-                key={item.mediaId}
-                className="flex items-center gap-4 px-6 py-4"
-              >
+              <div key={item.mediaId} className="flex items-center gap-4 px-6 py-4">
                 <div className="w-8 flex-shrink-0 text-sm font-semibold text-gray-400">
                   #{index + 1}
                 </div>
 
-                <div className="flex flex-1 items-center gap-3 min-w-0">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div className="rounded-lg bg-gray-50 p-2">
                     {getMediaIcon(item.mediaType)}
                   </div>
