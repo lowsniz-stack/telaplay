@@ -9,6 +9,8 @@ import {
   Image as ImageIcon,
   ScrollText,
 } from 'lucide-react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import api from '../lib/api';
 
 function formatDate(iso) {
@@ -176,6 +178,76 @@ export default function LogsPage() {
 
   const isLoading = loadingScreens || loadingLogs;
 
+  function exportPDF() {
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text('Relatório Comercial - TelaPlay', 14, 20);
+
+    doc.setFontSize(10);
+    doc.text('Resumo de exibições de anúncios', 14, 28);
+
+    const periodLabel =
+      period === 'today'
+        ? 'Hoje'
+        : period === '7d'
+        ? 'Últimos 7 dias'
+        : period === '30d'
+        ? 'Últimos 30 dias'
+        : 'Todo período';
+
+    const screenLabel =
+      screenFilter
+        ? screens.find((s) => s.id === screenFilter)?.name || 'Tela filtrada'
+        : 'Todas as telas';
+
+    doc.setFontSize(11);
+    doc.text(`Período analisado: ${periodLabel}`, 14, 38);
+    doc.text(`Tela selecionada: ${screenLabel}`, 14, 45);
+
+    doc.setFontSize(12);
+    doc.text(`Total de exibições: ${summary.totalExibicoes}`, 14, 57);
+    doc.text(`Telas com atividade: ${summary.totalTelas}`, 14, 64);
+    doc.text(`Mídias exibidas: ${summary.totalMidias}`, 14, 71);
+
+    const topMedia = groupedByMedia[0];
+
+    const resumo = topMedia
+      ? `No período analisado, sua campanha registrou ${summary.totalExibicoes} exibições. A mídia com melhor desempenho foi "${topMedia.mediaName}", com ${topMedia.totalExibicoes} exibições. Os anúncios foram exibidos em ${summary.totalTelas} tela(s), com ${summary.totalMidias} mídia(s) diferente(s).`
+      : `No período analisado, sua campanha registrou ${summary.totalExibicoes} exibições, distribuídas em ${summary.totalTelas} tela(s), com ${summary.totalMidias} mídia(s) diferente(s).`;
+
+    doc.setFontSize(11);
+    doc.text(resumo, 14, 84, { maxWidth: 180 });
+
+    autoTable(doc, {
+      startY: 100,
+      head: [['Mídia', 'Playlist', 'Telas', 'Exibições', 'Última exibição']],
+      body: groupedByMedia.map((item) => [
+        item.mediaName,
+        item.playlistName,
+        item.telas.join(', '),
+        String(item.totalExibicoes),
+        formatDate(item.ultimaExibicao),
+      ]),
+      styles: {
+        fontSize: 9,
+      },
+      headStyles: {
+        fillColor: [79, 70, 229],
+      },
+    });
+
+    const pageHeight = doc.internal.pageSize.height;
+    doc.setFontSize(9);
+    doc.text(
+      'Relatório gerado automaticamente pelo sistema TelaPlay',
+      14,
+      pageHeight - 10
+    );
+
+    doc.save('relatorio-comercial-telaplay.pdf');
+  }
+
   return (
     <div className="p-8">
       <div className="mb-8 flex items-start justify-between gap-4">
@@ -189,6 +261,13 @@ export default function LogsPage() {
         </div>
 
         <div className="flex gap-3">
+          <button
+            onClick={exportPDF}
+            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+          >
+            Baixar PDF
+          </button>
+
           <select
             value={screenFilter}
             onChange={(e) => setScreenFilter(e.target.value)}
