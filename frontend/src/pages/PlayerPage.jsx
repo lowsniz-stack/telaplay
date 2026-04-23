@@ -13,6 +13,8 @@ export default function PlayerPage() {
     Object.values(params)[0];
 
   const [items, setItems] = useState([]);
+  const [screenData, setScreenData] = useState(null);
+  const [playlistData, setPlaylistData] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
   const [loading, setLoading] = useState(true);
@@ -45,6 +47,8 @@ export default function PlayerPage() {
         const mediaItems = res.data?.items || [];
 
         setItems(Array.isArray(mediaItems) ? mediaItems : []);
+        setScreenData(res.data?.screen || null);
+        setPlaylistData(res.data?.playlist || null);
       } catch (err) {
         console.error("Erro ao carregar player:", err);
         setItems([]);
@@ -81,6 +85,38 @@ export default function PlayerPage() {
 
     return () => clearTimeout(timer);
   }, [currentIndex, normalizedItems]);
+
+  useEffect(() => {
+    if (!screenData?.id || normalizedItems.length === 0) return;
+
+    const currentItem = normalizedItems[currentIndex];
+
+    const logDisplay = async () => {
+      try {
+        await api.post("/logs/display", {
+          screenId: screenData.id,
+          event: "MEDIA_STARTED",
+          metadata: {
+            screenToken,
+            screenName: screenData?.name || null,
+            playlistId: playlistData?.id || null,
+            playlistName: playlistData?.name || null,
+            mediaId: currentItem?.media?.id || null,
+            mediaName: currentItem?.media?.name || null,
+            mediaType: currentItem?.media?.type || null,
+            mediaUrl: currentItem?.media?.url || null,
+            duration: currentItem?.duration || null,
+            order: currentItem?.order || null,
+            startedAt: new Date().toISOString(),
+          },
+        });
+      } catch (error) {
+        console.error("Erro ao registrar histórico de exibição:", error);
+      }
+    };
+
+    logDisplay();
+  }, [currentIndex, normalizedItems, screenData, playlistData, screenToken]);
 
   if (loading) {
     return (
