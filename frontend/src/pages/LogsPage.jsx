@@ -182,7 +182,7 @@ export default function LogsPage() {
     const doc = new jsPDF();
 
     doc.setFontSize(18);
-    doc.text('Relatório Comercial - TelaPlay', 14, 20);
+    doc.text('Relatório Comercial - Vextor Mídia', 14, 20);
 
     doc.setFontSize(10);
     doc.text('Resumo de exibições de anúncios', 14, 28);
@@ -240,12 +240,12 @@ export default function LogsPage() {
     const pageHeight = doc.internal.pageSize.height;
     doc.setFontSize(9);
     doc.text(
-      'Relatório gerado automaticamente pelo sistema TelaPlay',
+      'Relatório gerado automaticamente pelo sistema Vextor Mídia',
       14,
       pageHeight - 10
     );
 
-    doc.save('relatorio-comercial-telaplay.pdf');
+    doc.save('relatorio-comercial-vextor-midia.pdf');
   }
 
   return (

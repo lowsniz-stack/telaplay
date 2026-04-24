@@ -16,9 +16,9 @@ export default function TickerBar() {
   });
 
   const fallbackNews = [
-    "TelaPlay: mídia digital inteligente para comércios locais",
-    "Anuncie sua empresa aqui e alcance clientes em tempo real",
-    "Notícias e índices são atualizados automaticamente",
+    "Vextor Mídia: publicidade digital inteligente para comércios locais",
+    "Anuncie sua empresa e aumente sua visibilidade em tempo real",
+    "Campanhas, índices e informações exibidos de forma profissional",
   ];
 
   const [news, setNews] = useState(fallbackNews);
@@ -100,9 +100,8 @@ export default function TickerBar() {
   }, []);
 
   useEffect(() => {
-    const NEWS_CACHE_KEY = "telaplay_news_cache";
+    const NEWS_CACHE_KEY = "vextor_news_cache";
 
-    // 1. tenta usar cache imediatamente
     try {
       const cachedNews = localStorage.getItem(NEWS_CACHE_KEY);
       if (cachedNews) {
@@ -115,7 +114,6 @@ export default function TickerBar() {
       console.error("Erro ao ler cache de notícias:", error);
     }
 
-    // 2. busca as notícias reais em segundo plano
     const fetchNews = async () => {
       try {
         const { data } = await api.get("/news");
@@ -207,7 +205,7 @@ export default function TickerBar() {
 
         <div className="ticker-divider" />
 
-        <div className="ticker-brand">TelaPlay</div>
+        <div className="ticker-brand">Vextor Mídia</div>
 
         <div className="ticker-divider" />
 

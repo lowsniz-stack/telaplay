@@ -167,11 +167,11 @@ export default function PlayerPage() {
         <div className="rounded-xl border border-white/10 bg-black/60 p-2 shadow-lg backdrop-blur-md">
           <img
             src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://w.app/telaplay"
-            alt="QR Code para contato"
+            alt="QR Code Vextor Mídia"
             className="h-20 w-20 rounded-md bg-white p-1"
           />
           <p className="mt-1 text-center text-[10px] text-white opacity-80">
-            Anuncie aqui
+            Anuncie na Vextor
           </p>
         </div>
       </div>
