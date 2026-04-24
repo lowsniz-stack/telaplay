@@ -1,0 +1,21 @@
+{
+  "name": "TelaPlay Player",
+  "short_name": "TelaPlay",
+  "start_url": "/player/cmo1hoq950010yg0u3119ycs6",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
