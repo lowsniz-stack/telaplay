@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import api from "../../lib/api";
 
 const BACKEND_URL = "https://telaplay.onrender.com/api";
 
@@ -17,10 +16,10 @@ export default function TickerBar() {
   });
 
   const fallbackNews = [
-    "Vextor Mídia: publicidade digital inteligente para comércios locais",
-    "Anuncie sua empresa em telas digitais de alto impacto",
-    "Sua marca aparecendo todos os dias para clientes da região",
-    "Campanhas locais com exibição profissional e relatório comercial",
+    "Vextor Mídia: sua marca aparecendo todos os dias para clientes da região",
+    "Publicidade digital em telas com impacto local e visual profissional",
+    "Anuncie em pontos estratégicos e aumente a visibilidade da sua empresa",
+    "Campanhas com exibição contínua, QR Code e relatório comercial",
   ];
 
   const [news, setNews] = useState(fallbackNews);
@@ -41,21 +40,15 @@ export default function TickerBar() {
         const usdData = await usdRes.json();
         const btcData = await btcRes.json();
 
-        const usdValue = Number(usdData.USDBRL.bid);
-        const usdPct = Number(usdData.USDBRL.pctChange);
-
-        const btcValue = Number(btcData.BTCBRL.bid);
-        const btcPct = Number(btcData.BTCBRL.pctChange);
-
-        setUsd(`R$ ${usdValue.toFixed(2)}`);
-        setUsdChange(usdPct);
+        setUsd(`R$ ${Number(usdData.USDBRL.bid).toFixed(2)}`);
+        setUsdChange(Number(usdData.USDBRL.pctChange));
 
         setBtc(
-          `R$ ${btcValue.toLocaleString("pt-BR", {
+          `R$ ${Number(btcData.BTCBRL.bid).toLocaleString("pt-BR", {
             maximumFractionDigits: 0,
           })}`
         );
-        setBtcChange(btcPct);
+        setBtcChange(Number(btcData.BTCBRL.pctChange));
       } catch (error) {
         console.error("Erro ao buscar preços:", error);
       }
@@ -101,109 +94,73 @@ export default function TickerBar() {
   }, []);
 
   useEffect(() => {
-    const NEWS_CACHE_KEY = "vextor_news_cache_final";
+    const NEWS_CACHE_KEY = "vextor_news_cache_tvbro_final_v3";
 
-    const saveNews = (items) => {
-      const clean = items
+    function saveNews(items) {
+      const cleanNews = items
         .map((item) => String(item || "").trim())
         .filter(Boolean);
 
-      if (clean.length > 0) {
-        setNews(clean);
+      if (cleanNews.length > 0) {
+        setNews(cleanNews);
         localStorage.setItem(
           NEWS_CACHE_KEY,
           JSON.stringify({
             updatedAt: new Date().toISOString(),
-            news: clean,
+            news: cleanNews,
           })
         );
         return true;
       }
 
       return false;
-    };
+    }
 
-    const loadCache = () => {
+    function loadCache() {
       try {
         const cached = localStorage.getItem(NEWS_CACHE_KEY);
-        if (!cached) return false;
+        if (!cached) return;
 
         const parsed = JSON.parse(cached);
+
         if (Array.isArray(parsed?.news) && parsed.news.length > 0) {
           setNews(parsed.news);
-          return true;
         }
-
-        return false;
-      } catch {
-        return false;
+      } catch (error) {
+        console.error("Erro ao ler cache de notícias:", error);
       }
-    };
+    }
 
-    const fetchWithTimeout = async (url, options = {}, timeout = 12000) => {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeout);
-
+    async function fetchNews() {
       try {
-        const response = await fetch(url, {
-          ...options,
-          signal: controller.signal,
+        const response = await fetch(`${BACKEND_URL}/news?t=${Date.now()}`, {
+          method: "GET",
           cache: "no-store",
           headers: {
             Accept: "application/json",
             "Cache-Control": "no-cache",
-            ...(options.headers || {}),
           },
         });
-
-        clearTimeout(timer);
 
         if (!response.ok) {
           throw new Error(`Erro HTTP ${response.status}`);
         }
 
-        return await response.json();
-      } catch (error) {
-        clearTimeout(timer);
-        throw error;
-      }
-    };
+        const data = await response.json();
 
-    const fetchNews = async () => {
-      try {
-        const { data } = await api.get(`/news?t=${Date.now()}`);
-
-        if (Array.isArray(data?.news) && saveNews(data.news)) {
-          return true;
+        if (Array.isArray(data?.news)) {
+          saveNews(data.news);
         }
       } catch (error) {
-        console.error("Falha via api.get('/news'):", error);
+        console.error("Erro ao buscar notícias no backend:", error);
       }
-
-      try {
-        const data = await fetchWithTimeout(`${BACKEND_URL}/news?t=${Date.now()}`);
-
-        if (Array.isArray(data?.news) && saveNews(data.news)) {
-          return true;
-        }
-      } catch (error) {
-        console.error("Falha via fetch backend direto:", error);
-      }
-
-      return false;
-    };
+    }
 
     loadCache();
-
     fetchNews();
 
-    const retryInterval = setInterval(fetchNews, 30000);
-    const updateInterval = setInterval(fetchNews, 180000);
-
-    return () => {
-      clearInterval(retryInterval);
-      clearInterval(updateInterval);
-    };
+    const interval = setInterval(fetchNews, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const renderArrow = (value) => {
