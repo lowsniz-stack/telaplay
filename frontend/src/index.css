@@ -164,19 +164,26 @@
   0% {
     transform: translateX(0);
   }
+
   100% {
-    transform: translateX(-33.333%);
+    transform: translateX(-50%);
   }
 }
 
 .ticker-news-track {
+  display: flex;
+  width: max-content;
+  animation: vextor-news-scroll 32s linear infinite;
+  will-change: transform;
+}
+
+.ticker-news-group {
   display: inline-flex;
   align-items: center;
   gap: 36px;
   white-space: nowrap;
-  width: max-content;
-  animation: vextor-news-scroll 38s linear infinite;
-  will-change: transform;
+  flex-shrink: 0;
+  padding-right: 36px;
 }
 
 .ticker-news-item {

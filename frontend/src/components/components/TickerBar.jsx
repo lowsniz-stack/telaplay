@@ -147,7 +147,7 @@ export default function TickerBar() {
     return `${value > 0 ? "+" : ""}${value.toFixed(2)}%`;
   };
 
-  const newsLoop = [...news, ...news, ...news];
+  const newsItems = [...news, ...news, ...news, ...news];
 
   return (
     <div className="ticker-shell">
@@ -199,11 +199,21 @@ export default function TickerBar() {
 
       <div className="ticker-news-line">
         <div className="ticker-news-track">
-          {newsLoop.map((item, index) => (
-            <span key={index} className="ticker-news-item">
-              {item}
-            </span>
-          ))}
+          <div className="ticker-news-group">
+            {newsItems.map((item, index) => (
+              <span key={`a-${index}`} className="ticker-news-item">
+                {item}
+              </span>
+            ))}
+          </div>
+
+          <div className="ticker-news-group" aria-hidden="true">
+            {newsItems.map((item, index) => (
+              <span key={`b-${index}`} className="ticker-news-item">
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
