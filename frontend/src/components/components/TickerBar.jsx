@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../../lib/api";
 
+const BACKEND_URL = "https://telaplay.onrender.com/api";
+
 export default function TickerBar() {
   const [time, setTime] = useState(new Date());
   const [usd, setUsd] = useState("R$ --");
@@ -14,10 +16,14 @@ export default function TickerBar() {
     icon: "⛅",
   });
 
-  const [news, setNews] = useState([
-    "Carregando notícias...",
-    "Aguarde alguns instantes para atualização das notícias",
-  ]);
+  const fallbackNews = [
+    "Vextor Mídia: publicidade digital inteligente para comércios locais",
+    "Anuncie sua empresa em telas digitais de alto impacto",
+    "Sua marca aparecendo todos os dias para clientes da região",
+    "Campanhas locais com exibição profissional e relatório comercial",
+  ];
+
+  const [news, setNews] = useState(fallbackNews);
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -95,21 +101,71 @@ export default function TickerBar() {
   }, []);
 
   useEffect(() => {
-    const NEWS_CACHE_KEY = "vextor_real_news_cache_v2";
+    const NEWS_CACHE_KEY = "vextor_news_cache_final";
+
+    const saveNews = (items) => {
+      const clean = items
+        .map((item) => String(item || "").trim())
+        .filter(Boolean);
+
+      if (clean.length > 0) {
+        setNews(clean);
+        localStorage.setItem(
+          NEWS_CACHE_KEY,
+          JSON.stringify({
+            updatedAt: new Date().toISOString(),
+            news: clean,
+          })
+        );
+        return true;
+      }
+
+      return false;
+    };
 
     const loadCache = () => {
       try {
         const cached = localStorage.getItem(NEWS_CACHE_KEY);
-
-        if (!cached) return;
+        if (!cached) return false;
 
         const parsed = JSON.parse(cached);
-
         if (Array.isArray(parsed?.news) && parsed.news.length > 0) {
           setNews(parsed.news);
+          return true;
         }
+
+        return false;
+      } catch {
+        return false;
+      }
+    };
+
+    const fetchWithTimeout = async (url, options = {}, timeout = 12000) => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          cache: "no-store",
+          headers: {
+            Accept: "application/json",
+            "Cache-Control": "no-cache",
+            ...(options.headers || {}),
+          },
+        });
+
+        clearTimeout(timer);
+
+        if (!response.ok) {
+          throw new Error(`Erro HTTP ${response.status}`);
+        }
+
+        return await response.json();
       } catch (error) {
-        console.error("Erro ao ler cache de notícias:", error);
+        clearTimeout(timer);
+        throw error;
       }
     };
 
@@ -117,58 +173,36 @@ export default function TickerBar() {
       try {
         const { data } = await api.get(`/news?t=${Date.now()}`);
 
-        if (Array.isArray(data.news) && data.news.length > 0) {
-          const cleanNews = data.news
-            .map((item) => String(item || "").trim())
-            .filter(Boolean);
-
-          if (cleanNews.length > 0) {
-            setNews(cleanNews);
-
-            localStorage.setItem(
-              NEWS_CACHE_KEY,
-              JSON.stringify({
-                updatedAt: new Date().toISOString(),
-                news: cleanNews,
-              })
-            );
-
-            return true;
-          }
+        if (Array.isArray(data?.news) && saveNews(data.news)) {
+          return true;
         }
-
-        return false;
       } catch (error) {
-        console.error("Erro ao buscar notícias:", error);
-        return false;
+        console.error("Falha via api.get('/news'):", error);
       }
+
+      try {
+        const data = await fetchWithTimeout(`${BACKEND_URL}/news?t=${Date.now()}`);
+
+        if (Array.isArray(data?.news) && saveNews(data.news)) {
+          return true;
+        }
+      } catch (error) {
+        console.error("Falha via fetch backend direto:", error);
+      }
+
+      return false;
     };
 
     loadCache();
 
-    let retryInterval;
+    fetchNews();
 
-    const startNews = async () => {
-      const success = await fetchNews();
-
-      if (!success) {
-        retryInterval = setInterval(async () => {
-          const retrySuccess = await fetchNews();
-
-          if (retrySuccess && retryInterval) {
-            clearInterval(retryInterval);
-          }
-        }, 8000);
-      }
-    };
-
-    startNews();
-
+    const retryInterval = setInterval(fetchNews, 30000);
     const updateInterval = setInterval(fetchNews, 180000);
 
     return () => {
+      clearInterval(retryInterval);
       clearInterval(updateInterval);
-      if (retryInterval) clearInterval(retryInterval);
     };
   }, []);
 
