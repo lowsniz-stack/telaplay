@@ -63,7 +63,6 @@ export default function PlayerPage() {
 
     const currentItem = normalizedItems[currentIndex];
     const isVideo = currentItem?.media?.type?.includes("video");
-
     const duration = (currentItem?.duration || (isVideo ? 15 : 10)) * 1000;
 
     const timer = setTimeout(() => {
@@ -83,18 +82,20 @@ export default function PlayerPage() {
 
     const currentItem = normalizedItems[currentIndex];
 
-    api.post("/logs/display", {
-      screenId: screenData.id,
-      event: "MEDIA_STARTED",
-      metadata: {
-        screenToken,
-        screenName: screenData?.name,
-        playlistName: playlistData?.name,
-        mediaName: currentItem?.media?.name,
-        mediaType: currentItem?.media?.type,
-        startedAt: new Date().toISOString(),
-      },
-    }).catch(() => {});
+    api
+      .post("/logs/display", {
+        screenId: screenData.id,
+        event: "MEDIA_STARTED",
+        metadata: {
+          screenToken,
+          screenName: screenData?.name,
+          playlistName: playlistData?.name,
+          mediaName: currentItem?.media?.name,
+          mediaType: currentItem?.media?.type,
+          startedAt: new Date().toISOString(),
+        },
+      })
+      .catch(() => {});
   }, [currentIndex, normalizedItems, screenData, playlistData, screenToken]);
 
   if (loading) {
@@ -117,20 +118,26 @@ export default function PlayerPage() {
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-black">
-      
-      {/* 🎬 ÁREA DO CLIENTE */}
-      <main className="relative h-[85vh] w-full overflow-hidden bg-black">
+      <main className="relative h-[86vh] w-full overflow-hidden bg-black">
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
             fade ? "opacity-100" : "opacity-0"
           }`}
         >
           {current?.type.includes("image") && (
-            <img
-              src={current.url}
-              alt=""
-              className="h-full w-full object-cover"
-            />
+            <>
+              <img
+                src={current.url}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover blur-2xl scale-110 opacity-35"
+              />
+
+              <img
+                src={current.url}
+                alt=""
+                className="relative z-10 h-full w-full object-contain"
+              />
+            </>
           )}
 
           {current?.type.includes("video") && (
@@ -139,34 +146,29 @@ export default function PlayerPage() {
               autoPlay
               muted
               playsInline
-              className="h-full w-full object-cover"
+              className="h-full w-full object-contain"
             />
           )}
         </div>
       </main>
 
-      {/* 📊 RODAPÉ FIXO */}
-      <footer className="flex h-[15vh] w-full border-t border-white/10 bg-[#0f172a]">
-        
-        {/* TICKER */}
-        <div className="flex h-full flex-1 items-center overflow-hidden">
+      <footer className="flex h-[14vh] w-full border-t border-white/10 bg-[#07101d]">
+        <div className="h-full flex-1 overflow-hidden">
           <TickerBar />
         </div>
 
-        {/* QR CODE */}
-        <div className="flex h-full w-[140px] items-center justify-center border-l border-white/10 bg-[#0b1220]">
+        <div className="flex h-full w-[118px] items-center justify-center border-l border-white/10 bg-[#050b14]">
           <div className="flex flex-col items-center justify-center">
             <img
               src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://w.app/telaplay"
               alt="QR Code Vextor"
-              className="h-20 w-20 rounded-md bg-white p-1"
+              className="h-[74px] w-[74px] rounded-md bg-white p-1"
             />
-            <p className="mt-1 text-[10px] text-white/80">
+            <p className="mt-1 text-[9px] leading-none text-white/80">
               Anuncie na Vextor
             </p>
           </div>
         </div>
-
       </footer>
     </div>
   );

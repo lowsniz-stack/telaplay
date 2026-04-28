@@ -2,99 +2,209 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  background: #000;
-  font-family: Inter, sans-serif;
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    width: 100%;
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: #000;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
 }
 
-/* CONTAINER */
+/* ===== TICKER PREMIUM VEXTOR ===== */
+
 .ticker-shell {
   width: 100%;
   height: 100%;
+  background: linear-gradient(180deg, #07111f 0%, #050b14 100%);
+  color: #ffffff;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, #0c1420, #0a0f19);
-}
-
-/* LINHAS */
-.ticker-row {
-  display: flex;
-  align-items: center;
-  padding: 6px 12px;
-}
-
-.ticker-row.top {
-  height: 40%;
-  gap: 12px;
-}
-
-.ticker-row.news {
-  height: 35%;
   overflow: hidden;
 }
 
-.ticker-row.bottom {
-  height: 25%;
-  justify-content: center;
-  font-size: 11px;
-  color: #c9d2de;
+.ticker-topline {
+  height: 48%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px 3px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-/* BOXES */
-.ticker-box {
+.ticker-card {
+  height: 100%;
+  min-width: 118px;
   display: flex;
   flex-direction: column;
-  min-width: 110px;
-  color: white;
+  justify-content: center;
+  padding: 0 10px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ticker-card-index {
+  min-width: 132px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.ticker-card-weather {
+  min-width: 120px;
+}
+
+.ticker-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #eef4fb;
+  font-size: 13px;
+  font-weight: 900;
+  flex-shrink: 0;
 }
 
 .ticker-title {
   font-size: 11px;
-  font-weight: 800;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
 .ticker-label {
-  font-size: 9px;
+  font-size: 8px;
+  font-weight: 900;
   color: #96a3b5;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
 }
 
 .ticker-value {
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.ticker-value.up {
+  color: #22c55e;
+}
+
+.ticker-value.down {
+  color: #ef4444;
 }
 
 .ticker-sub {
-  font-size: 10px;
+  font-size: 9px;
   color: #9caabd;
+  line-height: 1.1;
 }
 
-/* BRAND / CLOCK */
+.ticker-sub.up {
+  color: #22c55e;
+}
+
+.ticker-sub.down {
+  color: #ef4444;
+}
+
 .ticker-brand {
-  font-weight: 900;
+  min-width: 120px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 14px;
+  font-weight: 900;
+  color: #ffffff;
+  text-align: center;
+  line-height: 1.05;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .ticker-clock {
-  font-size: 20px;
+  min-width: 82px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
   font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.04em;
 }
 
-/* NOTÍCIAS */
-@keyframes scrollNews {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+.ticker-news-line {
+  height: 31%;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding: 0 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+@keyframes vextor-news-scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 .ticker-news-track {
   display: inline-flex;
-  gap: 30px;
+  align-items: center;
+  gap: 34px;
   white-space: nowrap;
+  min-width: 100%;
   padding-left: 100%;
-  animation: scrollNews 40s linear infinite;
+  animation: vextor-news-scroll 55s linear infinite;
+  will-change: transform;
 }
 
 .ticker-news-item {
-  font-size: 14px;
-  color: white;
+  position: relative;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e8eef7;
+  padding-left: 14px;
+}
+
+.ticker-news-item::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  top: -1px;
+  color: #22c55e;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.ticker-cta {
+  height: 21%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 500;
+  color: #c9d2de;
+  letter-spacing: 0.01em;
 }
