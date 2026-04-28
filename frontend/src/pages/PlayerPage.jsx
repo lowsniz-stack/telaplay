@@ -38,15 +38,14 @@ export default function PlayerPage() {
         setLoading(true);
 
         if (!screenToken) {
-          console.error("Token da tela não encontrado na rota.");
+          console.error("Token da tela não encontrado.");
           setItems([]);
           return;
         }
 
         const res = await api.get(`/player/${screenToken}`);
-        const mediaItems = res.data?.items || [];
 
-        setItems(Array.isArray(mediaItems) ? mediaItems : []);
+        setItems(res.data?.items || []);
         setScreenData(res.data?.screen || null);
         setPlaylistData(res.data?.playlist || null);
       } catch (err) {
@@ -64,15 +63,9 @@ export default function PlayerPage() {
     if (normalizedItems.length === 0) return;
 
     const currentItem = normalizedItems[currentIndex];
-    const mediaType = currentItem?.media?.type || "";
+    const isVideo = currentItem?.media?.type?.includes("video");
 
-    let duration = 10000;
-
-    if (mediaType.includes("video")) {
-      duration = (currentItem?.duration || 15) * 1000;
-    } else {
-      duration = (currentItem?.duration || 10) * 1000;
-    }
+    const duration = (currentItem?.duration || (isVideo ? 15 : 10)) * 1000;
 
     const timer = setTimeout(() => {
       setFade(false);
@@ -91,32 +84,18 @@ export default function PlayerPage() {
 
     const currentItem = normalizedItems[currentIndex];
 
-    const logDisplay = async () => {
-      try {
-        await api.post("/logs/display", {
-          screenId: screenData.id,
-          event: "MEDIA_STARTED",
-          metadata: {
-            screenToken,
-            screenName: screenData?.name || null,
-            playlistId: playlistData?.id || null,
-            playlistName: playlistData?.name || null,
-            mediaId: currentItem?.media?.id || null,
-            mediaName: currentItem?.media?.name || null,
-            mediaType: currentItem?.media?.type || null,
-            mediaUrl: currentItem?.media?.url || null,
-            duration: currentItem?.duration || null,
-            order: currentItem?.order || null,
-            startedAt: new Date().toISOString(),
-          },
-        });
-      } catch (error) {
-        console.error("Erro ao registrar histórico de exibição:", error);
-      }
-    };
-
-    logDisplay();
-  }, [currentIndex, normalizedItems, screenData, playlistData, screenToken]);
+    api.post("/logs/display", {
+      screenId: screenData.id,
+      event: "MEDIA_STARTED",
+      metadata: {
+        screenToken,
+        screenName: screenData?.name,
+        playlistName: playlistData?.name,
+        mediaName: currentItem?.media?.name,
+        startedAt: new Date().toISOString(),
+      },
+    }).catch(() => {});
+  }, [currentIndex, normalizedItems, screenData, playlistData]);
 
   if (loading) {
     return (
@@ -137,46 +116,51 @@ export default function PlayerPage() {
   const current = normalizedItems[currentIndex]?.media;
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-black">
-      <div
-        className={`absolute inset-0 transition-opacity duration-500 ${
-          fade ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {current?.type.includes("image") && (
-          <img
-            src={current.url}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-        )}
+    <div className="relative h-screen w-screen overflow-hidden bg-black flex items-center justify-center">
+      
+      <div className="w-full h-full scale-[0.95] origin-center">
+        
+        <div
+          className={`absolute inset-0 transition-opacity duration-500 ${
+            fade ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          {current?.type.includes("image") && (
+            <img
+              src={current.url}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          )}
 
-        {current?.type.includes("video") && (
-          <video
-            src={current.url}
-            autoPlay
-            muted
-            playsInline
-            className="h-full w-full object-cover"
-          />
-        )}
-      </div>
-
-      {/* QR CODE PREMIUM */}
-      <div className="absolute bottom-32 right-6 z-50">
-        <div className="rounded-xl border border-white/10 bg-black/60 p-2 shadow-lg backdrop-blur-md">
-          <img
-            src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://w.app/telaplay"
-            alt="QR Code Vextor Mídia"
-            className="h-20 w-20 rounded-md bg-white p-1"
-          />
-          <p className="mt-1 text-center text-[10px] text-white opacity-80">
-            Anuncie na Vextor
-          </p>
+          {current?.type.includes("video") && (
+            <video
+              src={current.url}
+              autoPlay
+              muted
+              playsInline
+              className="h-full w-full object-cover"
+            />
+          )}
         </div>
-      </div>
 
-      <TickerBar />
+        {/* QR CODE */}
+        <div className="absolute bottom-32 right-6 z-50">
+          <div className="rounded-xl border border-white/10 bg-black/60 p-2 shadow-lg backdrop-blur-md">
+            <img
+              src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://w.app/telaplay"
+              alt="QR Code"
+              className="h-20 w-20 rounded-md bg-white p-1"
+            />
+            <p className="mt-1 text-center text-[10px] text-white opacity-80">
+              Anuncie na Vextor
+            </p>
+          </div>
+        </div>
+
+        <TickerBar />
+
+      </div>
     </div>
   );
 }

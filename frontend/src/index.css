@@ -11,9 +11,7 @@
     -webkit-font-smoothing: antialiased;
 
     /* 🔥 ajuste global para TV BRO */
-    transform: scale(0.95);
-    transform-origin: top left;
-    width: 105%;
+
   }
 
   ::-webkit-scrollbar { width: 5px; height: 5px; }
