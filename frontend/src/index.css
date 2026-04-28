@@ -156,27 +156,26 @@
   display: flex;
   align-items: center;
   overflow: hidden;
-  padding: 0 10px;
+  padding: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 @keyframes vextor-news-scroll {
   0% {
-    transform: translateX(100%);
+    transform: translateX(0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-33.333%);
   }
 }
 
 .ticker-news-track {
   display: inline-flex;
   align-items: center;
-  gap: 34px;
+  gap: 36px;
   white-space: nowrap;
-  min-width: 100%;
-  padding-left: 100%;
-  animation: vextor-news-scroll 55s linear infinite;
+  width: max-content;
+  animation: vextor-news-scroll 38s linear infinite;
   will-change: transform;
 }
 
