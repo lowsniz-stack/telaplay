@@ -38,7 +38,6 @@ export default function PlayerPage() {
         setLoading(true);
 
         if (!screenToken) {
-          console.error("Token da tela não encontrado.");
           setItems([]);
           return;
         }
@@ -92,10 +91,11 @@ export default function PlayerPage() {
         screenName: screenData?.name,
         playlistName: playlistData?.name,
         mediaName: currentItem?.media?.name,
+        mediaType: currentItem?.media?.type,
         startedAt: new Date().toISOString(),
       },
     }).catch(() => {});
-  }, [currentIndex, normalizedItems, screenData, playlistData]);
+  }, [currentIndex, normalizedItems, screenData, playlistData, screenToken]);
 
   if (loading) {
     return (
@@ -116,10 +116,10 @@ export default function PlayerPage() {
   const current = normalizedItems[currentIndex]?.media;
 
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-black flex items-center justify-center">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-black">
       
-      <div className="w-full h-full scale-[0.95] origin-center">
-        
+      {/* 🎬 ÁREA DO CLIENTE */}
+      <main className="relative h-[85vh] w-full overflow-hidden bg-black">
         <div
           className={`absolute inset-0 transition-opacity duration-500 ${
             fade ? "opacity-100" : "opacity-0"
@@ -143,24 +143,31 @@ export default function PlayerPage() {
             />
           )}
         </div>
+      </main>
+
+      {/* 📊 RODAPÉ FIXO */}
+      <footer className="flex h-[15vh] w-full border-t border-white/10 bg-[#0f172a]">
+        
+        {/* TICKER */}
+        <div className="flex h-full flex-1 items-center overflow-hidden">
+          <TickerBar />
+        </div>
 
         {/* QR CODE */}
-        <div className="absolute bottom-32 right-6 z-50">
-          <div className="rounded-xl border border-white/10 bg-black/60 p-2 shadow-lg backdrop-blur-md">
+        <div className="flex h-full w-[140px] items-center justify-center border-l border-white/10 bg-[#0b1220]">
+          <div className="flex flex-col items-center justify-center">
             <img
               src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://w.app/telaplay"
-              alt="QR Code"
+              alt="QR Code Vextor"
               className="h-20 w-20 rounded-md bg-white p-1"
             />
-            <p className="mt-1 text-center text-[10px] text-white opacity-80">
+            <p className="mt-1 text-[10px] text-white/80">
               Anuncie na Vextor
             </p>
           </div>
         </div>
 
-        <TickerBar />
-
-      </div>
+      </footer>
     </div>
   );
 }

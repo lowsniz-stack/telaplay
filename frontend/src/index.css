@@ -9,201 +9,46 @@
     margin: 0;
     font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
-
-    /* 🔥 ajuste global para TV BRO */
-
   }
-
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 99px; }
 }
 
-/* ===== TICKER PREMIUM (AJUSTADO PARA TV) ===== */
+/* ===== TICKER ===== */
 .ticker-shell {
-  position: fixed;
-  left: 24px;
-  right: 24px;
-  bottom: 12px;
-  z-index: 60;
-  border-radius: 16px;
+  position: relative;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   background: linear-gradient(180deg, rgba(12, 20, 32, 0.96), rgba(10, 15, 25, 0.96));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.34);
   backdrop-filter: blur(12px);
 }
 
 .ticker-top {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 46px;
-  padding: 7px 14px;
+  gap: 10px;
+  height: 60%;
+  padding: 6px 12px;
 }
 
 .ticker-bottom {
-  border-top: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.03);
-  color: #c9d2de;
+  height: 40%;
   font-size: 10px;
   text-align: center;
-  padding: 5px 10px;
-  letter-spacing: 0.01em;
-}
-
-.ticker-divider {
-  width: 1px;
-  align-self: stretch;
-  background: rgba(255,255,255,0.08);
-}
-
-/* bloco esquerdo */
-.ticker-left-tag {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 108px;
-}
-
-.ticker-left-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.06);
+  color: #c9d2de;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #eef4fb;
-  font-size: 13px;
-  font-weight: 700;
 }
 
-.ticker-left-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.05;
-}
-
-.ticker-title {
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-}
-
-.ticker-sub {
-  color: #93a3b8;
-  font-size: 10px;
-}
-
-/* blocos de valor */
-.ticker-quote-block {
-  display: flex;
-  flex-direction: column;
-  min-width: 90px;
-  line-height: 1.05;
-}
-
-.ticker-quote-label {
-  color: #96a3b5;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  margin-bottom: 3px;
-}
-
-.ticker-quote-value {
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.ticker-quote-value.up {
-  color: #22c55e;
-}
-
-.ticker-quote-value.down {
-  color: #ef4444;
-}
-
-/* notícias */
-.ticker-news-wrap {
-  flex: 1;
-  overflow: hidden;
-  min-width: 0;
-}
-
-@keyframes ticker-news-scroll {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
-}
-
-.ticker-news-track {
-  display: inline-flex;
-  align-items: center;
-  gap: 28px;
-  white-space: nowrap;
-  min-width: 100%;
-  padding-left: 100%;
-  animation: ticker-news-scroll 100s linear infinite;
-  will-change: transform;
-}
-
-.ticker-news-item {
-  position: relative;
-  color: #eef3f8;
-  font-size: 12px;
-  font-weight: 500;
-  padding-left: 13px;
-}
-
-.ticker-news-item::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  top: 0;
-  color: #22c55e;
-  font-size: 14px;
-  line-height: 1;
-}
-
-/* clima */
-.ticker-weather-block {
-  display: flex;
-  flex-direction: column;
-  min-width: 94px;
-  line-height: 1.05;
-}
-
-.ticker-weather-temp {
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 800;
-  margin-bottom: 2px;
-}
-
-.ticker-weather-city {
-  color: #9caabd;
-  font-size: 10px;
-}
-
-/* marca */
+/* textos */
 .ticker-brand {
-  color: #ffffff;
-  font-size: 15px;
-  font-weight: 800;
-  min-width: 100px;
-  text-align: center;
-  letter-spacing: -0.01em;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
 }
 
-/* relógio */
 .ticker-clock {
-  color: #ffffff;
-  font-size: 22px;
-  font-weight: 800;
-  min-width: 72px;
-  text-align: right;
-  letter-spacing: -0.03em;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
 }
