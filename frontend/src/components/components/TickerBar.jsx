@@ -3,7 +3,6 @@ import api from "../../lib/api";
 
 export default function TickerBar() {
   const [time, setTime] = useState(new Date());
-
   const [usd, setUsd] = useState("R$ --");
   const [btc, setBtc] = useState("R$ --");
   const [usdChange, setUsdChange] = useState(0);
@@ -76,7 +75,6 @@ export default function TickerBar() {
         const code = data.current.weather_code;
 
         let icon = "⛅";
-
         if (code === 0) icon = "☀️";
         else if ([1, 2, 3].includes(code)) icon = "⛅";
         else if ([45, 48].includes(code)) icon = "🌫️";
@@ -151,40 +149,36 @@ export default function TickerBar() {
 
   return (
     <div className="ticker-shell">
-      <div className="ticker-top">
-        <div className="ticker-left-tag">
+      <div className="ticker-main">
+        <div className="ticker-module ticker-index">
           <span className="ticker-left-icon">↗</span>
-          <div className="ticker-left-text">
-            <span className="ticker-title">ÍNDICES</span>
-            <span className="ticker-sub">mercado</span>
+          <div>
+            <div className="ticker-title">ÍNDICES</div>
+            <div className="ticker-sub">mercado</div>
           </div>
         </div>
 
-        <div className="ticker-divider" />
-
-        <div className="ticker-quote-block">
-          <span className="ticker-quote-label">DÓLAR</span>
-          <span className={`ticker-quote-value ${renderClass(usdChange)}`}>
+        <div className="ticker-module ticker-quote">
+          <div className="ticker-quote-label">DÓLAR</div>
+          <div className={`ticker-quote-value ${renderClass(usdChange)}`}>
             {renderArrow(usdChange)} {usd}
-          </span>
-          <span className={`ticker-sub ${renderClass(usdChange)}`}>
+          </div>
+          <div className={`ticker-sub ${renderClass(usdChange)}`}>
             {renderPct(usdChange)}
-          </span>
+          </div>
         </div>
 
-        <div className="ticker-quote-block">
-          <span className="ticker-quote-label">BITCOIN</span>
-          <span className={`ticker-quote-value ${renderClass(btcChange)}`}>
+        <div className="ticker-module ticker-quote">
+          <div className="ticker-quote-label">BITCOIN</div>
+          <div className={`ticker-quote-value ${renderClass(btcChange)}`}>
             {renderArrow(btcChange)} {btc}
-          </span>
-          <span className={`ticker-sub ${renderClass(btcChange)}`}>
+          </div>
+          <div className={`ticker-sub ${renderClass(btcChange)}`}>
             {renderPct(btcChange)}
-          </span>
+          </div>
         </div>
 
-        <div className="ticker-divider" />
-
-        <div className="ticker-news-wrap">
+        <div className="ticker-module ticker-news-wrap">
           <div className="ticker-news-track">
             {news.map((item, index) => (
               <span key={index} className="ticker-news-item">
@@ -194,22 +188,16 @@ export default function TickerBar() {
           </div>
         </div>
 
-        <div className="ticker-divider" />
-
-        <div className="ticker-weather-block">
-          <span className="ticker-weather-temp">
+        <div className="ticker-module ticker-weather">
+          <div className="ticker-weather-temp">
             {weather.icon} {weather.temp}
-          </span>
-          <span className="ticker-weather-city">{weather.city}</span>
+          </div>
+          <div className="ticker-weather-city">{weather.city}</div>
         </div>
 
-        <div className="ticker-divider" />
+        <div className="ticker-module ticker-brand">Vextor Mídia</div>
 
-        <div className="ticker-brand">Vextor Mídia</div>
-
-        <div className="ticker-divider" />
-
-        <div className="ticker-clock">
+        <div className="ticker-module ticker-clock">
           {time.toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
