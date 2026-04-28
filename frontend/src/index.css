@@ -173,7 +173,7 @@
 .ticker-news-track {
   display: flex;
   width: max-content;
-  animation: vextor-news-scroll 32s linear infinite;
+  animation: vextor-news-scroll 55s linear infinite;
   will-change: transform;
 }
 
