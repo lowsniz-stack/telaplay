@@ -14,13 +14,10 @@ export default function TickerBar() {
     icon: "⛅",
   });
 
-  const fallbackNews = [
-    "Vextor Mídia: publicidade digital inteligente para comércios locais",
-    "Anuncie sua empresa e aumente sua visibilidade em tempo real",
-    "Campanhas, índices e informações exibidos de forma profissional",
-  ];
-
-  const [news, setNews] = useState(fallbackNews);
+  const [news, setNews] = useState([
+    "Carregando notícias...",
+    "Aguarde alguns instantes para atualização das notícias",
+  ]);
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
@@ -98,36 +95,81 @@ export default function TickerBar() {
   }, []);
 
   useEffect(() => {
-    const NEWS_CACHE_KEY = "vextor_news_cache";
+    const NEWS_CACHE_KEY = "vextor_real_news_cache_v2";
 
-    try {
-      const cachedNews = localStorage.getItem(NEWS_CACHE_KEY);
-      if (cachedNews) {
-        const parsed = JSON.parse(cachedNews);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setNews(parsed);
-        }
-      }
-    } catch (error) {
-      console.error("Erro ao ler cache de notícias:", error);
-    }
-
-    const fetchNews = async () => {
+    const loadCache = () => {
       try {
-        const { data } = await api.get("/news");
+        const cached = localStorage.getItem(NEWS_CACHE_KEY);
 
-        if (Array.isArray(data.news) && data.news.length > 0) {
-          setNews(data.news);
-          localStorage.setItem(NEWS_CACHE_KEY, JSON.stringify(data.news));
+        if (!cached) return;
+
+        const parsed = JSON.parse(cached);
+
+        if (Array.isArray(parsed?.news) && parsed.news.length > 0) {
+          setNews(parsed.news);
         }
       } catch (error) {
-        console.error("Erro ao buscar notícias:", error);
+        console.error("Erro ao ler cache de notícias:", error);
       }
     };
 
-    fetchNews();
-    const interval = setInterval(fetchNews, 180000);
-    return () => clearInterval(interval);
+    const fetchNews = async () => {
+      try {
+        const { data } = await api.get(`/news?t=${Date.now()}`);
+
+        if (Array.isArray(data.news) && data.news.length > 0) {
+          const cleanNews = data.news
+            .map((item) => String(item || "").trim())
+            .filter(Boolean);
+
+          if (cleanNews.length > 0) {
+            setNews(cleanNews);
+
+            localStorage.setItem(
+              NEWS_CACHE_KEY,
+              JSON.stringify({
+                updatedAt: new Date().toISOString(),
+                news: cleanNews,
+              })
+            );
+
+            return true;
+          }
+        }
+
+        return false;
+      } catch (error) {
+        console.error("Erro ao buscar notícias:", error);
+        return false;
+      }
+    };
+
+    loadCache();
+
+    let retryInterval;
+
+    const startNews = async () => {
+      const success = await fetchNews();
+
+      if (!success) {
+        retryInterval = setInterval(async () => {
+          const retrySuccess = await fetchNews();
+
+          if (retrySuccess && retryInterval) {
+            clearInterval(retryInterval);
+          }
+        }, 8000);
+      }
+    };
+
+    startNews();
+
+    const updateInterval = setInterval(fetchNews, 180000);
+
+    return () => {
+      clearInterval(updateInterval);
+      if (retryInterval) clearInterval(retryInterval);
+    };
   }, []);
 
   const renderArrow = (value) => {
